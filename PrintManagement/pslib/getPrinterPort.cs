@@ -63,18 +63,21 @@ namespace PrintManagement.pslib
                                 for (int i = 0; i < properties.Count; i++)
                                 {
                                     PSPropertyInfo psobject = obj.Properties[properties[i].Name];
-                                    if (psobject.GetType().ToString() == "System.Management.Automation.PSAdaptedProperty")
+                                    if (psobject.GetType().ToString() == "System.Management.Automation.PSAdaptedProperty" || psobject.GetType().ToString() == "System.Management.Automation.PSProperty")
                                     {
-                                        var getproperty = getobject.GetType().GetProperty(properties[i].Name);
-                                        if (getproperty != null)
+                                        if (properties[i].Name.IndexOf("_") != 0)
                                         {
-                                            if (psobject.Value == null)
+                                            var getproperty = getobject.GetType().GetProperty(properties[i].Name);
+                                            if (getproperty != null)
                                             {
-                                                getproperty.SetValue(getobject, null);
-                                            }
-                                            else
-                                            {
-                                                getproperty.SetValue(getobject, psobject.Value);
+                                                if (psobject.Value == null)
+                                                {
+                                                    getproperty.SetValue(getobject, null);
+                                                }
+                                                else
+                                                {
+                                                    getproperty.SetValue(getobject, psobject.Value);
+                                                }
                                             }
                                         }
                                     }
