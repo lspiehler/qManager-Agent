@@ -106,17 +106,65 @@ namespace PrintManagement
         }
         public async Task initiateWebSocket()
         {
-            Console.WriteLine("initiating web socket");
-
             var location = new Uri("wss://" + config["Server"] + "/echo");
 
-            string certificatePath = "C:\\win-print-api\\cert\\cert.pfx";
+            /*string certificatePath = "C:\\win-print-api\\cert\\cert.pfx";
 
             string certificatePassword = "1234";
 
-            X509Certificate clientCertificate = new X509Certificate2(certificatePath, certificatePassword);
+            X509Certificate clientCertificate = new X509Certificate2(certificatePath, certificatePassword);*/
 
-            clientWebSocket.Options.ClientCertificates.Add(clientCertificate);
+            List<StoreLocation> locations = new List<StoreLocation>();
+            locations.Add(StoreLocation.CurrentUser);
+            locations.Add(StoreLocation.LocalMachine);
+
+            X509Certificate2 certificate = null;
+
+            for (int i = 0; i < locations.Count; i++)
+            {
+                X509Store store = new X509Store(StoreName.My, locations[i]);
+
+                store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+
+                X509Certificate2Collection col = store.Certificates.Find(X509FindType.FindBySubjectName, config["Certificate"], false);
+
+                for (int j = 0; j < col.Count; j++)
+                {
+                    if (col[j].HasPrivateKey)
+                    {
+                        if (col[j].NotBefore <= DateTime.Now)
+                        {
+                            if (col[j].NotAfter >= DateTime.Now)
+                            {
+                                if (certificate == null)
+                                {
+                                    certificate = col[j];
+                                }
+                                else
+                                {
+                                    if (col[j].NotAfter <= certificate.NotAfter)
+                                    {
+                                        certificate = col[j];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (certificate == null) {
+                errorlog el = new errorlog();
+                el.write("Failed to find certificate", Environment.StackTrace, "error");
+                Console.ReadLine();
+                Environment.Exit(-1);
+            }
+            else
+            {
+                Console.WriteLine("Using certificate:");
+                Console.WriteLine(certificate.ToString());
+                clientWebSocket.Options.ClientCertificates.Add(certificate);
+            }
 
             if (config["Proxy"] != null) {
                 Console.WriteLine("Using proxy " + config["Proxy"]);
@@ -124,6 +172,8 @@ namespace PrintManagement
 
                 clientWebSocket.Options.Proxy = proxy;
             }
+
+            Console.WriteLine("Opening web socket");
 
             processTimer();
 
