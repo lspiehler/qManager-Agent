@@ -183,14 +183,11 @@ namespace PrintManagement
                 else if (message.body.path == "/printer/driver/list")
                 {
                     //Console.WriteLine("got to driver handler");
-                    try
-                    {
-                        cr.ProcessResponse(clientWebSocket, message);
-                    }
-                    catch(Exception e)
-                    {
-                        Console.WriteLine(e.ToString());
-                    }
+                    cr.ProcessResponse(clientWebSocket, message);
+                }
+                else if (message.body.path == "/printer/port/list")
+                {
+                    cr.ProcessResponse(clientWebSocket, message);
                 }
                 else
                 {
