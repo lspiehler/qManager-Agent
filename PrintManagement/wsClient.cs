@@ -115,8 +115,8 @@ namespace PrintManagement
             X509Certificate clientCertificate = new X509Certificate2(certificatePath, certificatePassword);*/
 
             List<StoreLocation> locations = new List<StoreLocation>();
-            locations.Add(StoreLocation.CurrentUser);
             locations.Add(StoreLocation.LocalMachine);
+            locations.Add(StoreLocation.CurrentUser);
 
             X509Certificate2 certificate = null;
 
