@@ -17,6 +17,7 @@ namespace PrintManagement
     class wsHandler
     {
         responderlib.CachedResponse cr = new responderlib.CachedResponse();
+        responderlib.ActionResponse ar = new responderlib.ActionResponse();
         responderlib.RegisterResponse rr = new responderlib.RegisterResponse();
 
         /*Dictionary<string, Action<ClientWebSocket, dynamic>> routes = new Dictionary<string, Action<ClientWebSocket, dynamic>>();
@@ -108,77 +109,10 @@ namespace PrintManagement
                 if (message.body.path == "/register")
                 {
                     rr.InventoryResponse(clientWebSocket, message);
-                    /*ResponseMessage resp = new ResponseMessage();
-
-                    resp.id = message.id;
-                    resp.type = "response";
-                    resp.body = GetLocalhostFqdn();
-
-                    string jsonresp = JsonConvert.SerializeObject(resp);*/
-
-                    /*ArraySegment<byte> bytesToSend = new ArraySegment<byte>(
-                         Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(resp))
-                     );*/
-
-                    /*byte[] compressedbytes = Compress(Encoding.UTF8.GetBytes(jsonresp));
-
-                    string s3 = Convert.ToBase64String(compressedbytes, Base64FormattingOptions.InsertLineBreaks);*/
-
-                    //string s3 = CompressString(jsonresp);
-
-                    /*ArraySegment<byte> bytesToSend = new ArraySegment<byte>(
-                         Encoding.UTF8.GetBytes(jsonresp)
-                     );
-
-                    await clientWebSocket.SendAsync(
-                         bytesToSend,
-                         WebSocketMessageType.Text,
-                         true,
-                         CancellationToken.None
-                     );*/
-
                 }
                 else if (message.body.path == "/printer/queue/list")
                 {
                     cr.ProcessResponse(clientWebSocket, message);
-
-                    /*PMPrintQueues pmprintqueues = new PMPrintQueues();
-
-                    Hashtable myPrintQueues = pmprintqueues.getQueues();
-
-                    HashTableResponse resp = new HashTableResponse();
-                    HashTableResponseBody body = new HashTableResponseBody();
-
-                    body.result = "success";
-                    body.message = null;
-                    body.data = myPrintQueues;
-
-                    resp.id = message.id;
-                    resp.type = "response";
-                    resp.body = body;
-
-                    string jsonresp = JsonConvert.SerializeObject(resp);
-
-                    Console.WriteLine(jsonresp);*/
-
-                    /*ArraySegment<byte> bytesToSend = new ArraySegment<byte>(
-                            Encoding.UTF8.GetBytes(jsonresp)
-                        );*/
-
-                    //byte[] compressedbytes = Compress(Encoding.UTF8.GetBytes(jsonresp));
-
-                    //string s3 = Convert.ToBase64String(compressedbytes, Base64FormattingOptions.InsertLineBreaks);
-
-                    /*ArraySegment<byte> bytesToSend = new ArraySegment<byte>(
-                            Encoding.UTF8.GetBytes(jsonresp)
-                        );
-
-                    await clientWebSocket.SendAsync(
-                            bytesToSend,
-                            WebSocketMessageType.Text,
-                            true,
-                            CancellationToken.None
-                        );*/
                 }
                 else if (message.body.path == "/printer/driver/list")
                 {
@@ -188,6 +122,14 @@ namespace PrintManagement
                 else if (message.body.path == "/printer/port/list")
                 {
                     cr.ProcessResponse(clientWebSocket, message);
+                }
+                else if (message.body.path == "/printer/queue/testpage")
+                {
+                    ar.ProcessResponse(clientWebSocket, message);
+                }
+                else if (message.body.path == "/printer/queue/flush")
+                {
+                    ar.ProcessResponse(clientWebSocket, message);
                 }
                 else
                 {
