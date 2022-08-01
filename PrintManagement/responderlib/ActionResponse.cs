@@ -14,12 +14,42 @@ namespace PrintManagement.responderlib
     {
         private pslib.testPage testpage = new pslib.testPage();
         private pslib.printQueue printqueue = new pslib.printQueue();
+        private pslib.addPort addport = new pslib.addPort();
         public async Task ProcessResponse(System.Net.WebSockets.Managed.ClientWebSocket ws, dynamic rm)
         {
             string path = rm.body.path;
             HashTableResponseBody body = new HashTableResponseBody();
 
-            if (path == "/printer/queue/testpage")
+            if (path == "/printer/port/create")
+            {
+                try
+                {
+                    string result = addport.Create(rm.body.options.ip, 1, rm.body.options.ip, 9100, true);
+                    if (result == null)
+                    {
+                        body.result = "success";
+                        body.message = "The port was created successfully";
+                    }
+                    else
+                    {
+                        body.result = "error";
+                        body.message = result;
+                    }
+                    body.data = null;
+                    /*body.data = new Hashtable()
+                    {
+                        {"name", rm.body.options.name },
+                        {"rowId", rm.body.options.rowId },
+                        {"server", rm.body.options.server }
+                    };*/
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }
+            }
+            else if (path == "/printer/queue/testpage")
             {
                 try
                 {
@@ -28,7 +58,8 @@ namespace PrintManagement.responderlib
                     {
                         body.result = "success";
                         body.message = "Test page submitted successfully";
-                    } else
+                    }
+                    else
                     {
                         body.result = "error";
                         body.message = result;
@@ -39,7 +70,8 @@ namespace PrintManagement.responderlib
                         {"rowId", rm.body.options.rowId },
                         {"server", rm.body.options.server }
                     };
-                } catch (Exception e)
+                }
+                catch (Exception e)
                 {
                     errorlog el = new errorlog();
                     el.write(e.ToString(), Environment.StackTrace, "error");

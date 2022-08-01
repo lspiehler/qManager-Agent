@@ -110,24 +110,28 @@ namespace PrintManagement
                 {
                     rr.InventoryResponse(clientWebSocket, message);
                 }
-                else if (message.body.path == "/printer/queue/list")
-                {
-                    cr.ProcessResponse(clientWebSocket, message);
-                }
                 else if (message.body.path == "/printer/driver/list")
                 {
                     //Console.WriteLine("got to driver handler");
                     cr.ProcessResponse(clientWebSocket, message);
                 }
+                else if (message.body.path == "/printer/port/create")
+                {
+                    ar.ProcessResponse(clientWebSocket, message);
+                }
                 else if (message.body.path == "/printer/port/list")
                 {
                     cr.ProcessResponse(clientWebSocket, message);
                 }
-                else if (message.body.path == "/printer/queue/testpage")
+                else if (message.body.path == "/printer/queue/flush")
                 {
                     ar.ProcessResponse(clientWebSocket, message);
                 }
-                else if (message.body.path == "/printer/queue/flush")
+                else if (message.body.path == "/printer/queue/list")
+                {
+                    cr.ProcessResponse(clientWebSocket, message);
+                }
+                else if (message.body.path == "/printer/queue/testpage")
                 {
                     ar.ProcessResponse(clientWebSocket, message);
                 }

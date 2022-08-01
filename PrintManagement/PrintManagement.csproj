@@ -144,6 +144,8 @@
     <Compile Include="errorlog.cs" />
     <Compile Include="printerlib\PMPrintQueues.cs" />
     <Compile Include="printerlib\printObjects.cs" />
+    <Compile Include="pslib\addPort.cs" />
+    <Compile Include="pslib\managementScope.cs" />
     <Compile Include="pslib\getPrinter.cs" />
     <Compile Include="pslib\getPrinterDriver.cs" />
     <Compile Include="pslib\getPrinterPort.cs" />
