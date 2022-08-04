@@ -123,6 +123,14 @@ namespace PrintManagement
                 {
                     cr.ProcessResponse(clientWebSocket, message);
                 }
+                else if (message.body.path == "/printer/queue/create")
+                {
+                    ar.ProcessResponse(clientWebSocket, message);
+                }
+                else if (message.body.path == "/printer/queue/delete")
+                {
+                    ar.ProcessResponse(clientWebSocket, message);
+                }
                 else if (message.body.path == "/printer/queue/flush")
                 {
                     ar.ProcessResponse(clientWebSocket, message);

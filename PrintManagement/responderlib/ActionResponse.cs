@@ -15,6 +15,8 @@ namespace PrintManagement.responderlib
         private pslib.testPage testpage = new pslib.testPage();
         private pslib.printQueue printqueue = new pslib.printQueue();
         private pslib.addPort addport = new pslib.addPort();
+        private pslib.addPrinter addprinter = new pslib.addPrinter();
+        private pslib.removePrinter removeprinter = new pslib.removePrinter();
         public async Task ProcessResponse(System.Net.WebSockets.Managed.ClientWebSocket ws, dynamic rm)
         {
             string path = rm.body.path;
@@ -42,6 +44,63 @@ namespace PrintManagement.responderlib
                         {"rowId", rm.body.options.rowId },
                         {"server", rm.body.options.server }
                     };*/
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }
+            }
+            else if (path == "/printer/queue/create")
+            {
+                try
+                {
+                    string result = addprinter.Create(new Dictionary<string, dynamic>(rm.body.options));
+                    if (result == null)
+                    {
+                        body.result = "success";
+                        body.message = "The print queue was created successfully";
+                    }
+                    else
+                    {
+                        body.result = "error";
+                        body.message = result;
+                    }
+                    body.data = new Hashtable(new Dictionary<string, object>(rm.body.options));
+                    /*body.data = new Hashtable()
+                    {
+                        {"name", rm.body.options.name },
+                        {"rowId", rm.body.options.rowId },
+                        {"server", rm.body.options.server }
+                    };*/
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }
+            }
+            else if (path == "/printer/queue/delete")
+            {
+                try
+                {
+                    string result = removeprinter.Delete(rm.body.options.name);
+                    if (result == null)
+                    {
+                        body.result = "success";
+                        body.message = "The print queue was deleted successfully";
+                    }
+                    else
+                    {
+                        body.result = "error";
+                        body.message = result;
+                    }
+                    body.data = new Hashtable()
+                    {
+                        {"name", rm.body.options.name },
+                        {"rowId", rm.body.options.rowId },
+                        {"server", rm.body.options.server }
+                    };
                 }
                 catch (Exception e)
                 {
