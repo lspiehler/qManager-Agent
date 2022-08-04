@@ -144,15 +144,14 @@
     <Compile Include="errorlog.cs" />
     <Compile Include="printerlib\PMPrintQueues.cs" />
     <Compile Include="printerlib\printObjects.cs" />
-    <Compile Include="pslib\addPort.cs" />
-    <Compile Include="pslib\addPrinter.cs" />
     <Compile Include="pslib\managementScope.cs" />
     <Compile Include="pslib\getPrinter.cs" />
     <Compile Include="pslib\getPrinterDriver.cs" />
     <Compile Include="pslib\getPrinterPort.cs" />
+    <Compile Include="pslib\printPort.cs" />
     <Compile Include="pslib\printQueue.cs" />
-    <Compile Include="pslib\removePrinter.cs" />
     <Compile Include="pslib\testPage.cs" />
+    <Compile Include="pslib\printProperties.cs" />
     <Compile Include="responderlib\ActionResponse.cs" />
     <Compile Include="responderlib\CachedResponse.cs" />
     <Compile Include="responderlib\Common.cs" />

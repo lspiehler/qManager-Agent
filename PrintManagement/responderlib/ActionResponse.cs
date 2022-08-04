@@ -14,9 +14,9 @@ namespace PrintManagement.responderlib
     {
         private pslib.testPage testpage = new pslib.testPage();
         private pslib.printQueue printqueue = new pslib.printQueue();
-        private pslib.addPort addport = new pslib.addPort();
-        private pslib.addPrinter addprinter = new pslib.addPrinter();
-        private pslib.removePrinter removeprinter = new pslib.removePrinter();
+        private pslib.printPort printport = new pslib.printPort();
+        //private pslib.addPrinter addprinter = new pslib.addPrinter();
+        //private pslib.removePrinter removeprinter = new pslib.removePrinter();
         public async Task ProcessResponse(System.Net.WebSockets.Managed.ClientWebSocket ws, dynamic rm)
         {
             string path = rm.body.path;
@@ -26,7 +26,7 @@ namespace PrintManagement.responderlib
             {
                 try
                 {
-                    string result = addport.Create(rm.body.options.ip, 1, rm.body.options.ip, 9100, true);
+                    string result = printport.Create(rm.body.options.ip, 1, rm.body.options.ip, 9100, true);
                     if (result == null)
                     {
                         body.result = "success";
@@ -55,7 +55,7 @@ namespace PrintManagement.responderlib
             {
                 try
                 {
-                    string result = addprinter.Create(new Dictionary<string, dynamic>(rm.body.options));
+                    string result = printqueue.Create(new Dictionary<string, dynamic>(rm.body.options));
                     if (result == null)
                     {
                         body.result = "success";
@@ -84,39 +84,11 @@ namespace PrintManagement.responderlib
             {
                 try
                 {
-                    string result = removeprinter.Delete(rm.body.options.name);
+                    string result = printqueue.Delete(rm.body.options.name);
                     if (result == null)
                     {
                         body.result = "success";
                         body.message = "The print queue was deleted successfully";
-                    }
-                    else
-                    {
-                        body.result = "error";
-                        body.message = result;
-                    }
-                    body.data = new Hashtable()
-                    {
-                        {"name", rm.body.options.name },
-                        {"rowId", rm.body.options.rowId },
-                        {"server", rm.body.options.server }
-                    };
-                }
-                catch (Exception e)
-                {
-                    errorlog el = new errorlog();
-                    el.write(e.ToString(), Environment.StackTrace, "error");
-                }
-            }
-            else if (path == "/printer/queue/testpage")
-            {
-                try
-                {
-                    string result = testpage.Print(rm.body.options.name);
-                    if (result == null)
-                    {
-                        body.result = "success";
-                        body.message = "Test page submitted successfully";
                     }
                     else
                     {
@@ -145,6 +117,63 @@ namespace PrintManagement.responderlib
                     {
                         body.result = "success";
                         body.message = "Print jobs deleted successfully";
+                    }
+                    else
+                    {
+                        body.result = "error";
+                        body.message = result;
+                    }
+                    body.data = new Hashtable()
+                    {
+                        {"name", rm.body.options.name },
+                        {"rowId", rm.body.options.rowId },
+                        {"server", rm.body.options.server }
+                    };
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }
+            }
+            else if (path == "/printer/queue/set")
+            {
+                try
+                {
+                    string result = printqueue.Update(new Dictionary<string, dynamic>(rm.body.options));
+                    if (result == null)
+                    {
+                        body.result = "success";
+                        body.message = "Queue options successfully updated";
+                    }
+                    else
+                    {
+                        body.result = "error";
+                        body.message = result;
+                    }
+                    body.data = new Hashtable()
+                    {
+                        {"name", rm.body.options.name },
+                        {"rowId", rm.body.options.rowId },
+                        {"options", rm.body.options.options },
+                        {"server", rm.body.options.server }
+                    };
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }
+            }
+            else if (path == "/printer/queue/testpage")
+            {
+                try
+                {
+                    string result = testpage.Print(rm.body.options.name);
+                    if (result == null)
+                    {
+                        body.result = "success";
+                        body.message = "Test page submitted successfully";
                     }
                     else
                     {
