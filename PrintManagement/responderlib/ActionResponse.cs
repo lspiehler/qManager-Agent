@@ -62,6 +62,36 @@ namespace PrintManagement.responderlib
                     el.write(e.ToString(), Environment.StackTrace, "error");
                 }
             }
+            else if (path == "/printer/port/list")
+            {
+                try
+                {
+                    bool updatecache = false;
+                    if (PropertyExists(rm.body.options, "updatecache"))
+                    {
+                        updatecache = rm.body.options.updatecache;
+                    }
+                    Dictionary<string, printerlib.GetPrinterPort> allports = printport.GetAll(updatecache);
+                    if (allports == null)
+                    {
+                        body.result = "success";
+                        body.message = null;
+                    }
+                    else
+                    {
+                        body.result = "error";
+                        body.message = "Failed retrieving the list of ports";
+                    }
+                    body.result = "success";
+                    body.message = null;
+                    body.data = new Hashtable(allports);
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }
+            }
             else if (path == "/printer/queue/create")
             {
                 try

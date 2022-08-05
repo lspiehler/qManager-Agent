@@ -15,6 +15,8 @@ namespace PrintManagement.responderlib
         Dictionary<string, ResponderLibCache> cachedtypes = new Dictionary<string, ResponderLibCache>();
         pslib.printQueue printqueue = new pslib.printQueue();
         private wslib.responder wsresponser = new wslib.responder();
+        pslib.printPort printport = new pslib.printPort();
+
         //List<ClientWebSocket> clients = new List<ClientWebSocket>();
         //ArraySegment<byte> cachedresponse;
 
@@ -120,11 +122,11 @@ namespace PrintManagement.responderlib
                     }
                     else if (path == "/printer/port/list")
                     {
-                        pslib.getPrinterPort getprinterport = new pslib.getPrinterPort();
+                        //pslib.getPrinterPort getprinterport = new pslib.getPrinterPort();
 
                         body.result = "success";
                         body.message = null;
-                        body.data = new Hashtable(getprinterport.Run(updatecache));
+                        body.data = new Hashtable(printport.GetAll(updatecache));
                     }
                     else if (path == "/printer/driver/list")
                     {
