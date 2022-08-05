@@ -14,6 +14,7 @@ namespace PrintManagement.responderlib
     {
         Dictionary<string, ResponderLibCache> cachedtypes = new Dictionary<string, ResponderLibCache>();
         pslib.printQueue printqueue = new pslib.printQueue();
+        private wslib.responder wsresponser = new wslib.responder();
         //List<ClientWebSocket> clients = new List<ClientWebSocket>();
         //ArraySegment<byte> cachedresponse;
 
@@ -69,7 +70,7 @@ namespace PrintManagement.responderlib
                     );
 
                 Console.WriteLine("Sending cached response");
-                try {
+                /*try {
                     await ws.SendAsync(
                         bytestosend,
                         WebSocketMessageType.Text,
@@ -78,6 +79,15 @@ namespace PrintManagement.responderlib
                     );
 
                     //ws.Dispose();
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }*/
+                try
+                {
+                    await wsresponser.Send(ws, bytestosend);
                 }
                 catch (Exception e)
                 {
@@ -152,7 +162,7 @@ namespace PrintManagement.responderlib
                         );
 
                         //Console.WriteLine("Sending response to message id " + clientkeys[i]);
-                        try
+                        /*try
                         {
                             await cachedtypes[path].clients[clientkeys[i]].SendAsync(
                                 bytestosend,
@@ -164,6 +174,15 @@ namespace PrintManagement.responderlib
                             //cachedtypes[path].clients[clientkeys[i]].Dispose();
                         }
                         catch(Exception e)
+                        {
+                            errorlog el = new errorlog();
+                            el.write(e.ToString(), Environment.StackTrace, "error");
+                        }*/
+                        try
+                        {
+                            await wsresponser.Send(cachedtypes[path].clients[clientkeys[i]], bytestosend);
+                        }
+                        catch (Exception e)
                         {
                             errorlog el = new errorlog();
                             el.write(e.ToString(), Environment.StackTrace, "error");

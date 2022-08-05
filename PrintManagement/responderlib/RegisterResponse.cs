@@ -13,6 +13,7 @@ namespace PrintManagement.responderlib
 {
     class RegisterResponse
     {
+        private wslib.responder wsresponser = new wslib.responder();
         private static string GetLocalhostFqdn()
         {
             var ipProperties = IPGlobalProperties.GetIPGlobalProperties();
@@ -42,12 +43,21 @@ namespace PrintManagement.responderlib
                  Encoding.UTF8.GetBytes(jsonresp)
              );
 
-            await ws.SendAsync(
+            /*await ws.SendAsync(
                  bytesToSend,
                  WebSocketMessageType.Text,
                  true,
                  CancellationToken.None
-             );
+             );*/
+            try
+            {
+                await wsresponser.Send(ws, bytesToSend);
+            }
+            catch (Exception e)
+            {
+                errorlog el = new errorlog();
+                el.write(e.ToString(), Environment.StackTrace, "error");
+            }
         }
     }
 }
