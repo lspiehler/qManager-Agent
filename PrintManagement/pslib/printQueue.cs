@@ -102,7 +102,7 @@ namespace PrintManagement.pslib
         
         private void updateCache(string queuename)
         { // need to modify code for updating vs creating. Check if key exists in cache????
-            Console.WriteLine("Updating cache for queue name " + queuename);
+            //Console.WriteLine("Updating cache for queue name " + queuename);
             try
             {
                 ManagementObject printer = Get(queuename);
@@ -518,7 +518,10 @@ namespace PrintManagement.pslib
                         }
                         else
                         {
-                            Console.WriteLine("Failed to set unknown property " + p + " while creating print queue " + printoptions["name"]);
+                            if (p != "server")
+                            {
+                                Console.WriteLine("Failed to set unknown property " + p + " while creating print queue " + printoptions["name"]);
+                            }
                         }
                     }
                     printer.SetPropertyValue("Network", true);
