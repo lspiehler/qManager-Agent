@@ -34,6 +34,8 @@ namespace PrintManagement.pslib
                         if (config["Legacy"] != null && config["Legacy"].ToLower() == "true")
                         {
                             Console.WriteLine("using legacy command");
+                            // change this to the below and try converting to native C#?
+                            //PowerShellInst.AddCommand("Get-CimInstance").AddParameter("ClassName", "Win32_PrinterDriver");
                             PowerShellInst.AddCommand("Get-WmiObject").AddParameter("Query", "SELECT * FROM Win32_PrinterDriver");
                         }
                         else
