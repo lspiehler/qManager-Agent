@@ -7,6 +7,7 @@ using System.Management;
 using System.Printing;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace PrintManagement.pslib
 {
@@ -142,6 +143,7 @@ namespace PrintManagement.pslib
                         }
                         else
                         {
+                            //Console.WriteLine(JsonConvert.SerializeObject(getobject));
                             cachedobjects.Add(queuename, getobject);
                         }
                     }
@@ -417,6 +419,7 @@ namespace PrintManagement.pslib
                 printqueue.Get();
                 if (printqueue["DeviceId"].ToString().ToLower() == name.ToLower())
                 {
+                    Console.WriteLine(printqueue["Comment"]);
                     return printqueue;
                 } else
                 {
