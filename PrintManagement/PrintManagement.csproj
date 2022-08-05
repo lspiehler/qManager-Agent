@@ -145,7 +145,6 @@
     <Compile Include="printerlib\PMPrintQueues.cs" />
     <Compile Include="printerlib\printObjects.cs" />
     <Compile Include="pslib\managementScope.cs" />
-    <Compile Include="pslib\getPrinter.cs" />
     <Compile Include="pslib\getPrinterDriver.cs" />
     <Compile Include="pslib\getPrinterPort.cs" />
     <Compile Include="pslib\printPort.cs" />
@@ -176,6 +175,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="wsHandler.cs" />
+    <Compile Include="wslib\responder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

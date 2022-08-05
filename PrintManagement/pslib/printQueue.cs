@@ -5,12 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Management;
 using System.Printing;
+using System.Management.Automation;
+using System.Collections.ObjectModel;
 
 namespace PrintManagement.pslib
 {
     class printQueue
     {
         static managementScope ms = managementScope.Instance;
+        static configHandler confighandler = configHandler.Instance;
+        static Dictionary<string, string> config = confighandler.getConfig();
+        Dictionary<string, printerlib.GetPrinter> cachedobjects;
+        getPrinterPort getprinterport = new getPrinterPort();
+        printPort printport = new printPort();
 
         Dictionary<string, Dictionary<string, string>> printprops = new Dictionary<string, Dictionary<string, string>>
         {
@@ -92,6 +99,300 @@ namespace PrintManagement.pslib
                 }
             }
         };
+        
+        private void updateCache(string queuename)
+        { // need to modify code for updating vs creating. Check if key exists in cache????
+            Console.WriteLine("Updating cache for queue name " + queuename);
+            try
+            {
+                ManagementObject printer = Get(queuename);
+                if (printer != null)
+                {
+                    printerlib.GetPrinter getobject = new printerlib.GetPrinter();
+
+                    foreach (PropertyData prop in printer.Properties)
+                    {
+                        var getproperty = getobject.GetType().GetProperty(prop.Name);
+                        if (getproperty != null)
+                        {
+                            if (prop.Value == null)
+                            {
+                                getproperty.SetValue(getobject, null);
+                            }
+                            else
+                            {
+                                getproperty.SetValue(getobject, prop.Value);
+                            }
+                        }
+                        //Console.WriteLine("{0}: {1}", prop.Name, prop.Value);
+                    }
+
+                    ManagementObject port = printport.Get(printer.Properties["PortName"].Value.ToString());
+                    if (port != null)
+                    {
+                        getobject.PrinterHostAddress = port.Properties["HostAddress"].Value.ToString();
+                        getobject.JobCount = (uint)printer.Properties["JobCountSinceLastReset"].Value;
+                        getobject.PrinterStatus = (uint)printer.Properties["PrinterState"].Value;
+
+                        //Console.WriteLine("Cache updated successfully");
+
+                        if(cachedobjects.ContainsKey(queuename))
+                        {
+                            cachedobjects[queuename] = getobject;
+                        }
+                        else
+                        {
+                            cachedobjects.Add(queuename, getobject);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to find the port to update the cache");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Failed to find the printer to update the cache");
+                }
+            }
+            catch(Exception e)
+            {
+                errorlog el = new errorlog();
+                el.write(e.ToString(), Environment.StackTrace, "error");
+                return;
+            }
+        }
+
+        public Dictionary<string, printerlib.GetPrinter> WMIGetAll(bool updatecache)
+        {
+            //https://stackoverflow.com/questions/978862/how-to-make-forward-only-read-only-wmi-queries-in-c
+            if (updatecache == true || cachedobjects == null)
+            {
+                try
+                {
+                    Dictionary<string, printerlib.GetPrinter> objects = new Dictionary<string, printerlib.GetPrinter>();
+                    Dictionary<string, printerlib.GetPrinterPort> printerports = getprinterport.Run(updatecache);
+
+                    //System.Management.ManagementObject oq = new System.Management.ObjectQuery("Select * from Win32_Printer");
+                    EnumerationOptions options = new EnumerationOptions();
+                    options.Rewindable = false;
+                    options.ReturnImmediately = true;
+
+                    SelectQuery query = new SelectQuery("Select * From Win32_Printer");
+                    ManagementObjectSearcher printers = new ManagementObjectSearcher(ms.Get(), query, options);
+
+                    foreach (ManagementObject printer in printers.Get())
+                    {
+                        printerlib.GetPrinter getobject = new printerlib.GetPrinter();
+                        foreach (PropertyData prop in printer.Properties)
+                        {
+                            var getproperty = getobject.GetType().GetProperty(prop.Name);
+                            if (getproperty != null)
+                            {
+                                if (prop.Value == null)
+                                {
+                                    getproperty.SetValue(getobject, null);
+                                }
+                                else
+                                {
+                                    getproperty.SetValue(getobject, prop.Value);
+                                }
+                            }
+                            //Console.WriteLine("{0}: {1}", prop.Name, prop.Value);
+                        }
+                        //Console.WriteLine(printer["Name"]);
+                        if (printerports.ContainsKey(printer.Properties["PortName"].Value.ToString()))
+                        {
+                            getobject.PrinterHostAddress = printerports[printer.Properties["PortName"].Value.ToString()].PrinterHostAddress;
+                        }
+
+                        getobject.JobCount = (uint)printer.Properties["JobCountSinceLastReset"].Value;
+                        getobject.PrinterStatus = (uint)printer.Properties["PrinterState"].Value;
+
+                        objects.Add(printer.Properties["Name"].Value.ToString(), getobject);
+                    }
+
+                    cachedobjects = objects;
+                    return objects;
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                    return null;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Returning cached printers");
+                return cachedobjects;
+            }
+        }
+
+        public Dictionary<string, printerlib.GetPrinter> CIMGetAll(bool updatecache)
+        {
+            // convert this to CIM instead of WMI
+            //https://stackoverflow.com/questions/978862/how-to-make-forward-only-read-only-wmi-queries-in-c
+            if (updatecache == true || cachedobjects == null)
+            {
+                try
+                {
+                    Dictionary<string, printerlib.GetPrinter> objects = new Dictionary<string, printerlib.GetPrinter>();
+                    Dictionary<string, printerlib.GetPrinterPort> printerports = getprinterport.Run(updatecache);
+
+                    //System.Management.ManagementObject oq = new System.Management.ObjectQuery("Select * from Win32_Printer");
+                    EnumerationOptions options = new EnumerationOptions();
+                    options.Rewindable = false;
+                    options.ReturnImmediately = true;
+
+                    SelectQuery query = new SelectQuery("Select * From Win32_Printer");
+                    ManagementObjectSearcher printers = new ManagementObjectSearcher(ms.Get(), query, options);
+
+                    foreach (ManagementObject printer in printers.Get())
+                    {
+                        printerlib.GetPrinter getobject = new printerlib.GetPrinter();
+                        foreach (PropertyData prop in printer.Properties)
+                        {
+                            var getproperty = getobject.GetType().GetProperty(prop.Name);
+                            if (getproperty != null)
+                            {
+                                if (prop.Value == null)
+                                {
+                                    getproperty.SetValue(getobject, null);
+                                }
+                                else
+                                {
+                                    getproperty.SetValue(getobject, prop.Value);
+                                }
+                            }
+                            //Console.WriteLine("{0}: {1}", prop.Name, prop.Value);
+                        }
+                        //Console.WriteLine(printer["Name"]);
+                        if (printerports.ContainsKey(printer.Properties["PortName"].Value.ToString()))
+                        {
+                            getobject.PrinterHostAddress = printerports[printer.Properties["PortName"].Value.ToString()].PrinterHostAddress;
+                        }
+
+                        getobject.JobCount = (uint)printer.Properties["JobCountSinceLastReset"].Value;
+                        getobject.PrinterStatus = (uint)printer.Properties["PrinterState"].Value;
+
+                        objects.Add(printer.Properties["Name"].Value.ToString(), getobject);
+                    }
+
+                    cachedobjects = objects;
+                    return objects;
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                    return null;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Returning cached printers");
+                return cachedobjects;
+            }
+        }
+
+        public Dictionary<string, printerlib.GetPrinter> GetAll(bool updatecache)
+        {
+            if (updatecache == true || cachedobjects == null)
+            {
+                Console.WriteLine("Running powershell command");
+
+                //getPrinterPort getprinterport = new getPrinterPort();
+                Dictionary<string, printerlib.GetPrinterPort> printerports = getprinterport.Run(updatecache);
+
+                Dictionary<string, printerlib.GetPrinter> objects = new Dictionary<string, printerlib.GetPrinter>();
+                try
+                {
+                    using (PowerShell PowerShellInst = PowerShell.Create())
+                    {
+                        if (config["Legacy"] != null && config["Legacy"].ToLower() == "true")
+                        {
+                            Console.WriteLine("using legacy command");
+                            PowerShellInst.AddCommand("Get-CimInstance").AddParameter("ClassName", "CIM_Printer");
+                        }
+                        else
+                        {
+                            PowerShellInst.AddCommand("Get-Printer");
+                        }
+
+                        Collection<PSObject> PSOutput = PowerShellInst.Invoke();
+
+                        if (PowerShellInst.HadErrors)
+                        {
+                            List<string> errors = new List<string>();
+                            for (int i = 0; i < PowerShellInst.Streams.Error.Count; i++)
+                            {
+                                errors.Add(PowerShellInst.Streams.Error[i].ToString());
+                            }
+                            errorlog el = new errorlog();
+                            el.write(String.Join("", errors), Environment.StackTrace, "error");
+                            return null;
+                        }
+
+                        foreach (PSObject obj in PSOutput)
+                        {
+                            printerlib.GetPrinter getobject = new printerlib.GetPrinter();
+                            if (obj != null)
+                            {
+                                List<PSPropertyInfo> properties = obj.Properties.ToList();
+                                for (int i = 0; i < properties.Count; i++)
+                                {
+                                    PSPropertyInfo psobject = obj.Properties[properties[i].Name];
+                                    if (psobject.GetType().ToString() == "System.Management.Automation.PSAdaptedProperty")
+                                    {
+                                        var getproperty = getobject.GetType().GetProperty(properties[i].Name);
+                                        if (getproperty != null)
+                                        {
+                                            if (psobject.Value == null)
+                                            {
+                                                getproperty.SetValue(getobject, null);
+                                            }
+                                            else
+                                            {
+                                                getproperty.SetValue(getobject, psobject.Value);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            //add port address
+                            if (printerports.ContainsKey(obj.Properties["PortName"].Value.ToString()))
+                            {
+                                getobject.PrinterHostAddress = printerports[obj.Properties["PortName"].Value.ToString()].PrinterHostAddress;
+                            }
+
+                            //add custom mappings if legacy commands are being used
+                            if (config["Legacy"] != null && config["Legacy"].ToLower() == "true")
+                            {
+                                getobject.JobCount = (uint)obj.Properties["JobCountSinceLastReset"].Value;
+                                getobject.PrinterStatus = (uint)obj.Properties["PrinterState"].Value;
+                            }
+
+                            objects.Add(obj.Properties["Name"].Value.ToString(), getobject);
+                        }
+                        cachedobjects = objects;
+                        return objects;
+                    }
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                    return null;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Used cached powershell command");
+                return cachedobjects;
+            }
+        }
         public string Clear(string name)
         {
             try
@@ -151,6 +452,7 @@ namespace PrintManagement.pslib
                         return "Failed to delete the print queue";
                     }*/
                     printqueue.Delete();
+                    cachedobjects.Remove(name);
                     return null;
                 } else
                 {
@@ -187,11 +489,11 @@ namespace PrintManagement.pslib
                     printerClass.Get();
                     var printer = printerClass.CreateInstance();
                     var props = printoptions.Keys;
-                    Console.WriteLine("Requested printer properties:");
+                    /*Console.WriteLine("Requested printer properties:");
                     foreach (var p in props)
                     {
                         Console.WriteLine(p + ": " + printoptions[p]);
-                    }
+                    }*/
                     foreach (var p in props)
                     {
                         //Console.WriteLine(p);
@@ -201,17 +503,17 @@ namespace PrintManagement.pslib
                             if (printprops[p]["type"] == "bool")
                             {
                                 printer.SetPropertyValue(printprops[p]["name"], printoptions[p]);
-                                Console.WriteLine(printprops[p]["name"] + " = " + printoptions[p] + " - " + printoptions[p].GetType().ToString());
+                                //Console.WriteLine(printprops[p]["name"] + " = " + printoptions[p] + " - " + printoptions[p].GetType().ToString());
                             }
                             else if (printprops[p]["type"] == "int")
                             {
                                 printer.SetPropertyValue(printprops[p]["name"], printoptions[p]);
-                                Console.WriteLine(printprops[p]["name"] + " = " + printoptions[p] + " - " + printoptions[p].GetType().ToString());
+                                //Console.WriteLine(printprops[p]["name"] + " = " + printoptions[p] + " - " + printoptions[p].GetType().ToString());
                             }
                             else
                             {
                                 printer.SetPropertyValue(printprops[p]["name"], printoptions[p]);
-                                Console.WriteLine(printprops[p]["name"] + " = " + printoptions[p] + " - " + printoptions[p].GetType().ToString());
+                                //Console.WriteLine(printprops[p]["name"] + " = " + printoptions[p] + " - " + printoptions[p].GetType().ToString());
                             }
                         }
                         else
@@ -229,10 +531,10 @@ namespace PrintManagement.pslib
                     //printer.SetPropertyValue("WorkOffline", true);
 
                     var npp = printer.Properties;
-                    foreach (var p in npp)
+                    /*foreach (var p in npp)
                     {
                         Console.WriteLine(p.Name + ": " + printer.GetPropertyValue(p.Name));
-                    }
+                    }*/
 
                     //printer.SetPropertyValue("DriverName", "Canon MF731C/733C UFR II");
                     //printer.SetPropertyValue("PortName", "192.168.1.52");
@@ -247,6 +549,10 @@ namespace PrintManagement.pslib
                     //options.Type = PutType.UpdateOrCreate;
                     options.Type = PutType.CreateOnly;
                     printer.Put(options);
+
+                    updateCache(printoptions["name"]);
+
+                    return null;
                 }
                 else
                 {
@@ -266,7 +572,7 @@ namespace PrintManagement.pslib
                 return e.ToString();
             }
 
-            return null;
+            //return null;
         }
         public string Update(Dictionary<string, dynamic> queueoptions)
         {
@@ -281,11 +587,11 @@ namespace PrintManagement.pslib
                     //printqueue.GetType().GetProperty("QueueDriver").SetValue(printqueue, "QueueDriver");
                     IDictionary<string, object> qo = queueoptions["options"];
                     var props = qo.Keys;
-                    Console.WriteLine("Requested printer properties:");
+                    /*Console.WriteLine("Requested printer properties:");
                     foreach (var p in props)
                     {
                         Console.WriteLine(p + ": " + qo[p]);
-                    }
+                    }*/
                     foreach (var p in props)
                     {
                         if (queueprops.ContainsKey(p))
@@ -303,14 +609,18 @@ namespace PrintManagement.pslib
                     }
 
                     var npp = printqueue.Properties;
-                    foreach (var p in npp)
+                    /*foreach (var p in npp)
                     {
                         Console.WriteLine(p.Name + ": " + printqueue.GetPropertyValue(p.Name));
-                    }
+                    }*/
 
                     PutOptions options = new PutOptions();
                     options.Type = PutType.UpdateOnly;
                     printqueue.Put(options);
+
+                    updateCache(queueoptions["name"]);
+
+                    return null;
                 } else
                 {
                     return "Failed to find a queue named " + queueoptions["name"];
@@ -323,7 +633,7 @@ namespace PrintManagement.pslib
 
                 return e.ToString();
             }
-            return null;
+            //return null;
         }
     }
 }

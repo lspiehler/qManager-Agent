@@ -13,6 +13,7 @@ namespace PrintManagement.responderlib
     class CachedResponse
     {
         Dictionary<string, ResponderLibCache> cachedtypes = new Dictionary<string, ResponderLibCache>();
+        pslib.printQueue printqueue = new pslib.printQueue();
         //List<ClientWebSocket> clients = new List<ClientWebSocket>();
         //ArraySegment<byte> cachedresponse;
 
@@ -101,11 +102,11 @@ namespace PrintManagement.responderlib
                         //PMPrintQueues pmprintqueues = new PMPrintQueues();
 
                         //Hashtable myPrintQueues = pmprintqueues.getQueues();
-                        pslib.getPrinter getprinter = new pslib.getPrinter();
+                        //pslib.getPrinter getprinter = new pslib.getPrinter();
 
                         body.result = "success";
                         body.message = null;
-                        body.data = new Hashtable(getprinter.Run(updatecache));
+                        body.data = new Hashtable(printqueue.GetAll(updatecache));
                     }
                     else if (path == "/printer/port/list")
                     {

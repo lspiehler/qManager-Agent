@@ -137,7 +137,7 @@ namespace PrintManagement
                 }
                 else if (message.body.path == "/printer/queue/list")
                 {
-                    cr.ProcessResponse(clientWebSocket, message);
+                    ar.ProcessResponse(clientWebSocket, message);
                 }
                 else if (message.body.path == "/printer/queue/set")
                 {
