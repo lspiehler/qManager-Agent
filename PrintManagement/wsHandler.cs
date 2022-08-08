@@ -135,11 +135,19 @@ namespace PrintManagement
                 {
                     ar.ProcessResponse(clientWebSocket, message);
                 }
+                else if (message.body.path == "/printer/queue/getconfig")
+                {
+                    ar.ProcessResponse(clientWebSocket, message);
+                }
                 else if (message.body.path == "/printer/queue/list")
                 {
                     ar.ProcessResponse(clientWebSocket, message);
                 }
                 else if (message.body.path == "/printer/queue/set")
+                {
+                    ar.ProcessResponse(clientWebSocket, message);
+                }
+                else if (message.body.path == "/printer/queue/setconfig")
                 {
                     ar.ProcessResponse(clientWebSocket, message);
                 }

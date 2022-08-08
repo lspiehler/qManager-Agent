@@ -15,7 +15,9 @@ namespace PrintManagement.responderlib
         private pslib.testPage testpage = new pslib.testPage();
         private pslib.printQueue printqueue = new pslib.printQueue();
         private pslib.printPort printport = new pslib.printPort();
+        //private pslib.queueProperties queueproperties = new pslib.queueProperties();
         private wslib.responder wsresponser = new wslib.responder();
+        //private pslib.addPrinter addprinter = new pslib.addPrinter();
         //private pslib.addPrinter addprinter = new pslib.addPrinter();
         //private pslib.removePrinter removeprinter = new pslib.removePrinter();
 
@@ -177,6 +179,30 @@ namespace PrintManagement.responderlib
                     el.write(e.ToString(), Environment.StackTrace, "error");
                 }
             }
+            else if (path == "/printer/queue/getconfig")
+            {
+                try
+                {
+                    Dictionary<string, string> result = printqueue.GetPrintSettings(rm.body.options);
+                    if (result != null)
+                    {
+                        body.result = "success";
+                        body.message = null;
+                        body.data = new Hashtable(result);
+                    }
+                    else
+                    {
+                        body.result = "error";
+                        body.message = "Failed to get print queue settings";
+                        body.data = null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }
+            }
             else if (path == "/printer/queue/list")
             {
                 try
@@ -216,6 +242,35 @@ namespace PrintManagement.responderlib
                     {
                         body.result = "success";
                         body.message = "Queue options successfully updated";
+                    }
+                    else
+                    {
+                        body.result = "error";
+                        body.message = result;
+                    }
+                    body.data = new Hashtable()
+                    {
+                        {"name", rm.body.options.name },
+                        {"rowId", rm.body.options.rowId },
+                        {"options", rm.body.options.options },
+                        {"server", rm.body.options.server }
+                    };
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }
+            }
+            else if (path == "/printer/queue/setconfig")
+            {
+                try
+                {
+                    string result = printqueue.SetPrintSettings(rm.body.options.name, new Dictionary<string, dynamic>(rm.body.options));
+                    if (result == null)
+                    {
+                        body.result = "success";
+                        body.message = "Print settings updated successfully";
                     }
                     else
                     {

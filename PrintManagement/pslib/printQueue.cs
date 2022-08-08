@@ -8,6 +8,7 @@ using System.Printing;
 //using System.Management.Automation;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace PrintManagement.pslib
 {
@@ -55,7 +56,7 @@ namespace PrintManagement.pslib
             { "sharename", new Dictionary<string, string>
                 {
                     { "type", "bool" },
-                    { "name", "Shared" }
+                    { "name", "ShareName" }
                 }
             },
             { "drivername", new Dictionary<string, string>
@@ -100,67 +101,74 @@ namespace PrintManagement.pslib
                 }
             }
         };
-        
+
         private void updateCache(string queuename)
         { // need to modify code for updating vs creating. Check if key exists in cache????
             //Console.WriteLine("Updating cache for queue name " + queuename);
-            try
+            if (cachedobjects != null)
             {
-                ManagementObject printer = Get(queuename);
-                if (printer != null)
+                try
                 {
-                    printerlib.GetPrinter getobject = new printerlib.GetPrinter();
-
-                    foreach (PropertyData prop in printer.Properties)
+                    ManagementObject printer = Get(queuename);
+                    if (printer != null)
                     {
-                        var getproperty = getobject.GetType().GetProperty(prop.Name);
-                        if (getproperty != null)
+                        printerlib.GetPrinter getobject = new printerlib.GetPrinter();
+
+                        foreach (PropertyData prop in printer.Properties)
                         {
-                            if (prop.Value == null)
+                            var getproperty = getobject.GetType().GetProperty(prop.Name);
+                            if (getproperty != null)
                             {
-                                getproperty.SetValue(getobject, null);
+                                if (prop.Value == null)
+                                {
+                                    getproperty.SetValue(getobject, null);
+                                }
+                                else
+                                {
+                                    getproperty.SetValue(getobject, prop.Value);
+                                }
+                            }
+                            //Console.WriteLine("{0}: {1}", prop.Name, prop.Value);
+                        }
+
+                        ManagementObject port = printport.Get(printer.Properties["PortName"].Value.ToString());
+                        if (port != null)
+                        {
+                            getobject.PrinterHostAddress = port.Properties["HostAddress"].Value.ToString();
+                            getobject.JobCount = (uint)printer.Properties["JobCountSinceLastReset"].Value;
+                            getobject.PrinterStatus = (uint)printer.Properties["PrinterState"].Value;
+
+                            //Console.WriteLine("Cache updated successfully");
+
+                            if (cachedobjects.ContainsKey(queuename))
+                            {
+                                cachedobjects[queuename] = getobject;
                             }
                             else
                             {
-                                getproperty.SetValue(getobject, prop.Value);
+                                //Console.WriteLine(JsonConvert.SerializeObject(getobject));
+                                cachedobjects.Add(queuename, getobject);
                             }
-                        }
-                        //Console.WriteLine("{0}: {1}", prop.Name, prop.Value);
-                    }
-
-                    ManagementObject port = printport.Get(printer.Properties["PortName"].Value.ToString());
-                    if (port != null)
-                    {
-                        getobject.PrinterHostAddress = port.Properties["HostAddress"].Value.ToString();
-                        getobject.JobCount = (uint)printer.Properties["JobCountSinceLastReset"].Value;
-                        getobject.PrinterStatus = (uint)printer.Properties["PrinterState"].Value;
-
-                        //Console.WriteLine("Cache updated successfully");
-
-                        if(cachedobjects.ContainsKey(queuename))
-                        {
-                            cachedobjects[queuename] = getobject;
                         }
                         else
                         {
-                            //Console.WriteLine(JsonConvert.SerializeObject(getobject));
-                            cachedobjects.Add(queuename, getobject);
+                            Console.WriteLine("Failed to find the port to update the cache");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Failed to find the port to update the cache");
+                        Console.WriteLine("Failed to find the printer to update the cache");
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    Console.WriteLine("Failed to find the printer to update the cache");
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                    return;
                 }
             }
-            catch(Exception e)
+            else
             {
-                errorlog el = new errorlog();
-                el.write(e.ToString(), Environment.StackTrace, "error");
                 return;
             }
         }
@@ -327,7 +335,7 @@ namespace PrintManagement.pslib
                 PrintQueue printqueue = new PrintQueue(new LocalPrintServer(), name, PrintSystemDesiredAccess.AdministratePrinter);
                 printqueue.Purge();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 errorlog el = new errorlog();
                 el.write(e.ToString(), Environment.StackTrace, "error");
@@ -344,9 +352,10 @@ namespace PrintManagement.pslib
                 printqueue.Get();
                 if (printqueue["DeviceId"].ToString().ToLower() == name.ToLower())
                 {
-                    Console.WriteLine(printqueue["Comment"]);
+                    //Console.WriteLine(printqueue["Comment"]);
                     return printqueue;
-                } else
+                }
+                else
                 {
                     return null;
                 }
@@ -380,9 +389,12 @@ namespace PrintManagement.pslib
                         return "Failed to delete the print queue";
                     }*/
                     printqueue.Delete();
-                    cachedobjects.Remove(name);
+                    if(cachedobjects != null) {
+                        cachedobjects.Remove(name);
+                    }
                     return null;
-                } else
+                }
+                else
                 {
                     return "The printer " + name + " does not exist";
                 }
@@ -446,7 +458,7 @@ namespace PrintManagement.pslib
                         }
                         else
                         {
-                            if (p != "server")
+                            if (p != "server" && p != "config")
                             {
                                 Console.WriteLine("Failed to set unknown property " + p + " while creating print queue " + printoptions["name"]);
                             }
@@ -461,8 +473,8 @@ namespace PrintManagement.pslib
                     }
                     //printer.SetPropertyValue("WorkOffline", true);
 
-                    var npp = printer.Properties;
-                    /*foreach (var p in npp)
+                    /*var npp = printer.Properties;
+                    foreach (var p in npp)
                     {
                         Console.WriteLine(p.Name + ": " + printer.GetPropertyValue(p.Name));
                     }*/
@@ -483,7 +495,25 @@ namespace PrintManagement.pslib
 
                     updateCache(printoptions["name"]);
 
-                    return null;
+                    if(printoptions.ContainsKey("config"))
+                    {
+                        //Console.WriteLine(printoptions["name"].ToString());
+                        //Console.WriteLine(JsonConvert.SerializeObject(printoptions["config"]));
+                        //Console.WriteLine(JsonConvert.SerializeObject(printoptions["config"][0]));
+                        string sps = SetPrintSettings(printoptions["name"].ToString(), new Dictionary<string, dynamic>(printoptions["config"][0]));
+                        if(sps != null)
+                        {
+                            return "The print queue was created successfully, but applying print settings failed";
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
                 else
                 {
@@ -513,7 +543,8 @@ namespace PrintManagement.pslib
                 //var printqueue = new ManagementClass(ms.Get(), new ManagementObject(path), new ObjectGetOptions());
                 //printqueue.Get();
                 ManagementObject printqueue = Get(queueoptions["name"]);
-                if (printqueue != null) {
+                if (printqueue != null)
+                {
                     //PrintQueue printqueue = new PrintQueue(localprintserver, queueoptions["name"], PrintSystemDesiredAccess.AdministratePrinter);
                     //printqueue.GetType().GetProperty("QueueDriver").SetValue(printqueue, "QueueDriver");
                     IDictionary<string, object> qo = queueoptions["options"];
@@ -552,7 +583,8 @@ namespace PrintManagement.pslib
                     updateCache(queueoptions["name"]);
 
                     return null;
-                } else
+                }
+                else
                 {
                     return "Failed to find a queue named " + queueoptions["name"];
                 }
@@ -565,6 +597,154 @@ namespace PrintManagement.pslib
                 return e.ToString();
             }
             //return null;
+        }
+        public Dictionary<string, string> GetPrintSettings(dynamic options)
+        {
+            //Console.WriteLine(options.name);
+            Dictionary<string, string> pp = new Dictionary<string, string>();
+            string type;
+            if (options.GetType().GetProperty("type") == null)
+            {
+                type = "8";
+            }
+            else
+            {
+                type = options.type;
+            }
+            try
+            {
+                //var stdOutBuffer = new StringBuilder();
+                //var stdErrBuffer = new StringBuilder();
+                Process p = new Process();
+                // Redirect the output stream of the child process.
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.RedirectStandardError = true;
+                p.StartInfo.FileName = "setprinter.exe";
+                //Console.WriteLine("-show \"" + options.name + "\" " + type);
+                p.StartInfo.Arguments = "-show \"" + options.name + "\" " + type;
+                p.StartInfo.CreateNoWindow = true;
+                p.Start();
+
+                /*string output;
+                string error;
+
+                using (System.IO.StreamReader myOutput = p.StandardOutput)
+                {
+                    output = myOutput.ReadToEnd();
+                }
+                using (System.IO.StreamReader myError = p.StandardError)
+                {
+                    error = myError.ReadToEnd();
+
+                }*/
+                string sResult = p.StandardOutput.ReadToEnd();
+                //string eResult = p.StandardError.ReadToEnd();
+
+                //Console.WriteLine("this?");
+                string[] lines = sResult.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+
+                for (int i = 2; i < lines.Count() - 2; i++)
+                {
+                    //Console.WriteLine(lines[i]);
+                    string[] kv = lines[i].Split(new string[] { "=" }, StringSplitOptions.None);
+                    //Console.WriteLine(kv[0].Trim() + ": " + kv[1].Trim().Replace("\"", ""));
+                    //Console.WriteLine(kv[1]);
+                    pp.Add(kv[0].Trim(), kv[1].Trim().Replace("\"", ""));
+                }
+
+                //Console.WriteLine(error);
+
+                return pp;
+                /*var cmd = Cli.Wrap("setprinter.exe");
+                cmd.SetArguments(new string[] { options.name, type });
+                //cmd.st
+                Console.WriteLine("\"" + options.name + "\" " + type);
+                cmd.re
+                var result = cmd.Execute();
+                Console.WriteLine(result.StandardOutput);
+                Console.WriteLine(result.StandardError);
+                return result.StandardOutput;*/
+            }
+            catch (Exception e)
+            {
+                errorlog el = new errorlog();
+                el.write(e.ToString(), Environment.StackTrace, "error");
+                return pp;
+            }
+        }
+        public string SetPrintSettings(string name, Dictionary<string, dynamic> printoptions)
+        {
+            //Console.WriteLine("Debugging here: ");
+            //Console.WriteLine(JsonConvert.SerializeObject(name));
+            ManagementObject printqueue = Get(name);
+            if (printqueue != null)
+            {
+                try
+                {
+                    IDictionary<string, object> po = printoptions["options"];
+                    string type;
+                    if (printoptions.ContainsKey("type"))
+                    {
+                        type = printoptions["type"].ToString();
+                    }
+                    else
+                    {
+                        type = "8";
+                    }
+                    //PrintQueue printqueue = new PrintQueue(localprintserver, queueoptions["name"], PrintSystemDesiredAccess.AdministratePrinter);
+                    //printqueue.GetType().GetProperty("QueueDriver").SetValue(printqueue, "QueueDriver");
+                    var props = po.Keys;
+                    /*Console.WriteLine("Requested printer properties:");
+                    foreach (var p in props)
+                    {
+                        Console.WriteLine(p + ": " + qo[p]);
+                    }*/
+                    List<string> optionargs = new List<string>();
+                    foreach (var prop in props)
+                    {
+                        //Console.WriteLine(prop + "=" + po[prop]);
+                        optionargs.Add(prop + "=" + po[prop]);
+                    }
+
+                    Process p = new Process();
+                    // Redirect the output stream of the child process.
+                    p.StartInfo.UseShellExecute = false;
+                    p.StartInfo.RedirectStandardOutput = true;
+                    p.StartInfo.RedirectStandardError = true;
+                    p.StartInfo.FileName = "setprinter.exe";
+                    //Console.WriteLine("\"" + name + "\" " + type + " pDevMode=" + String.Join(",", optionargs));
+                    p.StartInfo.Arguments = "\"" + name + "\" " + type + " pDevMode=" + String.Join(",", optionargs);
+                    p.StartInfo.CreateNoWindow = true;
+                    p.Start();
+
+                    //string sResult = p.StandardOutput.ReadToEnd();
+                    string eResult = p.StandardError.ReadToEnd();
+
+                    /*Console.WriteLine("Stdout:");
+                    Console.WriteLine(sResult);
+                    Console.WriteLine("Stderr:");
+                    Console.WriteLine(eResult);*/
+                    if(String.IsNullOrEmpty(eResult))
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        return eResult;
+                    }
+                }
+                catch(Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                    return e.ToString();
+                }
+            }
+            else
+            {
+                return "Failed to find a queue named " + name;
+            }
         }
     }
 }
