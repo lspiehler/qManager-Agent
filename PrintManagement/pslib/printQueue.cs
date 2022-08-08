@@ -334,6 +334,7 @@ namespace PrintManagement.pslib
             {
                 PrintQueue printqueue = new PrintQueue(new LocalPrintServer(), name, PrintSystemDesiredAccess.AdministratePrinter);
                 printqueue.Purge();
+                updateCache(name);
             }
             catch (Exception e)
             {
@@ -643,19 +644,30 @@ namespace PrintManagement.pslib
 
                 //Console.WriteLine("this?");
                 string[] lines = sResult.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                ////List<string> trimmedlines = new List<string>();
 
                 for (int i = 2; i < lines.Count() - 2; i++)
                 {
                     //Console.WriteLine(lines[i]);
-                    string[] kv = lines[i].Split(new string[] { "=" }, StringSplitOptions.None);
+                    string[] kv = lines[i].Trim().Split(new string[] { "=" }, StringSplitOptions.None);
                     //Console.WriteLine(kv[0].Trim() + ": " + kv[1].Trim().Replace("\"", ""));
                     //Console.WriteLine(kv[1]);
-                    pp.Add(kv[0].Trim(), kv[1].Trim().Replace("\"", ""));
+                    ////trimmedlines.Add(lines[i].Trim());
+                    pp.Add(kv[0], kv[1].Replace("\"", ""));
                 }
 
-                //Console.WriteLine(error);
+                /*trimmedlines.Sort();
 
-                return pp;
+                for (int i = 2; i < trimmedlines.Count - 2; i++)
+                {
+                    Console.WriteLine(trimmedlines[i]);
+                    string[] kv = trimmedlines[i].Split(new string[] { "=" }, StringSplitOptions.None);
+                    pp.Add(kv[0], kv[1].Replace("\"", ""));
+                }*/
+
+                    //Console.WriteLine(error);
+
+                    return pp;
                 /*var cmd = Cli.Wrap("setprinter.exe");
                 cmd.SetArguments(new string[] { options.name, type });
                 //cmd.st
