@@ -7,6 +7,7 @@ using System.Collections;
 using System.Net.WebSockets;
 using Newtonsoft.Json;
 using System.Threading;
+using System.Net.NetworkInformation;
 
 namespace PrintManagement.responderlib
 {
@@ -15,11 +16,13 @@ namespace PrintManagement.responderlib
         private pslib.testPage testpage = new pslib.testPage();
         private pslib.printQueue printqueue = new pslib.printQueue();
         private pslib.printPort printport = new pslib.printPort();
-        //private pslib.queueProperties queueproperties = new pslib.queueProperties();
+        private pslib.printDriver printdriver = new pslib.printDriver();
         private wslib.responder wsresponser = new wslib.responder();
-        //private pslib.addPrinter addprinter = new pslib.addPrinter();
-        //private pslib.addPrinter addprinter = new pslib.addPrinter();
-        //private pslib.removePrinter removeprinter = new pslib.removePrinter();
+        private static string GetLocalhostFqdn()
+        {
+            var ipProperties = IPGlobalProperties.GetIPGlobalProperties();
+            return string.IsNullOrWhiteSpace(ipProperties.DomainName) ? ipProperties.HostName : string.Format("{0}.{1}", ipProperties.HostName, ipProperties.DomainName);
+        }
 
         public static bool PropertyExists(dynamic obj, string name)
         {
@@ -321,7 +324,50 @@ namespace PrintManagement.responderlib
             }
             else if (path == "/printer/driver/list")
             {
+                try
+                {
+                    bool updatecache = false;
+                    if (PropertyExists(rm.body.options, "updatecache"))
+                    {
+                        updatecache = rm.body.options.updatecache;
+                    }
+                    Dictionary<string, printerlib.GetPrinterDriver> alldrivers = printdriver.Get(updatecache);
 
+                    //update driver cache in the background for next request
+                    Task.Factory.StartNew(() =>
+                    {
+                        printdriver.Get(true);
+                    });
+
+                        if (alldrivers == null)
+                    {
+                        body.result = "success";
+                        body.message = null;
+                    }
+                    else
+                    {
+                        body.result = "error";
+                        body.message = "Failed retrieving the list of drivers";
+                    }
+                    body.result = "success";
+                    body.message = null;
+                    body.data = new Hashtable(alldrivers);
+                }
+                catch(Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }
+            }
+            else if (path == "/register")
+            {
+                body.result = "error";
+                body.message = null;
+                body.data = new Hashtable()
+                {
+                    {"hostname", GetLocalhostFqdn()},
+                    {"agentVersion", "0.47" }
+                };
             }
             else
             {

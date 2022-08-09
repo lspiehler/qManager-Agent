@@ -81,6 +81,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_379C923153914526B6F4789B90B2C02A"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_3A41D64F5F02AE3AD0317CA2A1D7EEA5"
         "OwnerKey" = "8:_186C9EFF9CA047C1BB23CDC6918460FC"
         "MsmSig" = "8:_UNDEFINED"
@@ -273,12 +279,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_978D5AAFC1B445CEA17AA14B28D8EA7C"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_9FB337A47FC5DB836FBDD99CE18C0A75"
         "OwnerKey" = "8:_186C9EFF9CA047C1BB23CDC6918460FC"
         "MsmSig" = "8:_UNDEFINED"
@@ -389,6 +389,12 @@
         {
         "MsmKey" = "8:_E828715F8E8C239EF2F722A3D9A6F717"
         "OwnerKey" = "8:_186C9EFF9CA047C1BB23CDC6918460FC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_E8BF763F058443939CA36CD1F0417035"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1217,6 +1223,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_379C923153914526B6F4789B90B2C02A"
+            {
+            "SourcePath" = "8:..\\PrintManagement\\include\\PrintManagement.ico"
+            "TargetName" = "8:PrintManagement.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_3C485A48434A4594BAB755F01A9DCC25"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_3A41D64F5F02AE3AD0317CA2A1D7EEA5"
             {
             "AssemblyRegister" = "3:1"
@@ -2023,26 +2049,6 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_978D5AAFC1B445CEA17AA14B28D8EA7C"
-            {
-            "SourcePath" = "8:..\\PrintManagement.ico"
-            "TargetName" = "8:PrintManagement.ico"
-            "Tag" = "8:"
-            "Folder" = "8:_3C485A48434A4594BAB755F01A9DCC25"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_9FB337A47FC5DB836FBDD99CE18C0A75"
             {
             "AssemblyRegister" = "3:1"
@@ -2570,6 +2576,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E8BF763F058443939CA36CD1F0417035"
+            {
+            "SourcePath" = "8:..\\PrintManagement\\include\\setprinter.exe"
+            "TargetName" = "8:setprinter.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_3C485A48434A4594BAB755F01A9DCC25"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_EC18F19FD870CC76ACD08C63697B4C68"
             {
             "AssemblyRegister" = "3:1"
@@ -2830,7 +2856,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:qManager print management service"
         "ARPURLINFOABOUT" = "8:https://sapphirehealth.org/"
-        "ARPPRODUCTICON" = "8:_978D5AAFC1B445CEA17AA14B28D8EA7C"
+        "ARPPRODUCTICON" = "8:_379C923153914526B6F4789B90B2C02A"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"

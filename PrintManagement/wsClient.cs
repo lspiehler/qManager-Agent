@@ -106,7 +106,7 @@ namespace PrintManagement
         }
         public async Task initiateWebSocket()
         {
-            var location = new Uri("wss://" + config["Server"] + "/echo");
+            var location = new Uri("wss://" + config["Server"] + "/qmanager");
 
             /*string certificatePath = "C:\\win-print-api\\cert\\cert.pfx";
 

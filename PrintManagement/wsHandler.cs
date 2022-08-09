@@ -16,9 +16,9 @@ namespace PrintManagement
 {
     class wsHandler
     {
-        responderlib.CachedResponse cr = new responderlib.CachedResponse();
+        //responderlib.CachedResponse cr = new responderlib.CachedResponse();
         responderlib.ActionResponse ar = new responderlib.ActionResponse();
-        responderlib.RegisterResponse rr = new responderlib.RegisterResponse();
+        //responderlib.RegisterResponse rr = new responderlib.RegisterResponse();
 
         /*Dictionary<string, Action<ClientWebSocket, dynamic>> routes = new Dictionary<string, Action<ClientWebSocket, dynamic>>();
 
@@ -108,12 +108,12 @@ namespace PrintManagement
             {
                 if (message.body.path == "/register")
                 {
-                    rr.InventoryResponse(clientWebSocket, message);
+                    ar.ProcessResponse(clientWebSocket, message);
                 }
                 else if (message.body.path == "/printer/driver/list")
                 {
                     //Console.WriteLine("got to driver handler");
-                    cr.ProcessResponse(clientWebSocket, message);
+                    ar.ProcessResponse(clientWebSocket, message);
                 }
                 else if (message.body.path == "/printer/port/create")
                 {

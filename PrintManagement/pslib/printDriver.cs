@@ -1,27 +1,20 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
+using System.Management.Automation;
 
 namespace PrintManagement.pslib
 {
-    class getPrinterDriver
+    class printDriver
     {
         static configHandler confighandler = configHandler.Instance;
         static Dictionary<string, string> config = confighandler.getConfig();
-        public class responseBody
-        {
-            public string result { get; set; }
-            public string message { get; set; }
-            public Dictionary<string, printerlib.GetPrinterDriver> data { get; set; }
-        }
 
         Dictionary<string, printerlib.GetPrinterDriver> cachedobjects;
-        public Dictionary<string, printerlib.GetPrinterDriver> Run(bool updatecache)
+        public Dictionary<string, printerlib.GetPrinterDriver> Get(bool updatecache)
         {
             if (updatecache == true || cachedobjects == null)
             {
@@ -101,7 +94,8 @@ namespace PrintManagement.pslib
                                 {
                                     objects.Add(modifiedname, getobject);
                                 }
-                            } else
+                            }
+                            else
                             {
                                 string printername = obj.Properties["Name"].Value.ToString();
                                 // prevent returning duplicate names for 32 and 64-bit drivers
