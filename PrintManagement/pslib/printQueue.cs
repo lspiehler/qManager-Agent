@@ -565,7 +565,7 @@ namespace PrintManagement.pslib
                     }
                     LocalPrintServer localPrintServer = new LocalPrintServer();
                     //PrintQueue printqueue = new PrintQueue(new LocalPrintServer(), name, PrintSystemDesiredAccess.AdministratePrinter);
-                    localPrintServer.InstallPrintQueue(printoptions["name"], printoptions["drivername"], new string[] { printoptions["portname"] }, "WinPrint", (PrintQueueAttributes)Enum.Parse(typeof(PrintQueueAttributes), String.Join(",", pqa)), sharename, comment, location, null, 1, 1);
+                    localPrintServer.InstallPrintQueue(printoptions["name"], printoptions["drivername"], new string[] { printoptions["portname"] }, "WinPrint", (PrintQueueAttributes)Enum.Parse(typeof(PrintQueueAttributes), String.Join(",", pqa)), sharename, comment, location, null, 1, 0);
                     updateCache(printoptions["name"]);
                     return null;
                 }
