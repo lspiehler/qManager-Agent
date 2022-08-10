@@ -14,6 +14,9 @@ namespace PrintManagement.pslib
 {
     class printQueue
     {
+        static string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+        static string strWorkPath = System.IO.Path.GetDirectoryName(strExeFilePath);
+
         static managementScope ms = managementScope.Instance;
         static configHandler confighandler = configHandler.Instance;
         static Dictionary<string, string> config = confighandler.getConfig();
@@ -417,11 +420,15 @@ namespace PrintManagement.pslib
                 return true;*/
 
             //wmi method
-            try
+            /*try
             {
                 ManagementObject printqueue = Get(printoptions["name"]);
                 if (printqueue == null)
                 {
+                    //need to use this to create the printer and WMI to update because of access denied issues when creating printers with WMI on newer OSes
+                    LocalPrintServer localPrintServer = new LocalPrintServer();
+                    //PrintQueue printqueue = new PrintQueue(new LocalPrintServer(), name, PrintSystemDesiredAccess.AdministratePrinter);
+                    localPrintServer.InstallPrintQueue(printoptions["name"], printoptions["drivername"], new string[] { printoptions["portname"] }, "WinPrint", PrintQueueAttributes.None);
                     //var printerClass = new ManagementClass(ms.Get(), new ManagementPath("Win32_Printer"), null);
                     //printerClass.Get();
                     //var printer = printerClass.CreateInstance();
@@ -430,11 +437,11 @@ namespace PrintManagement.pslib
                     printerClass.Get();
                     var printer = printerClass.CreateInstance();
                     var props = printoptions.Keys;
-                    /*Console.WriteLine("Requested printer properties:");
-                    foreach (var p in props)
-                    {
-                        Console.WriteLine(p + ": " + printoptions[p]);
-                    }*/
+                    //Console.WriteLine("Requested printer properties:");
+                    //foreach (var p in props)
+                    //{
+                    //    Console.WriteLine(p + ": " + printoptions[p]);
+                    //}
                     foreach (var p in props)
                     {
                         //Console.WriteLine(p);
@@ -465,20 +472,20 @@ namespace PrintManagement.pslib
                             }
                         }
                     }
-                    printer.SetPropertyValue("Network", true);
-                    printer.SetPropertyValue("Default", false);
-                    printer.SetPropertyValue("DeviceID", printoptions["name"]);
+                    //printer.SetPropertyValue("Network", true);
+                    //printer.SetPropertyValue("Default", false);
+                    //printer.SetPropertyValue("DeviceID", printoptions["name"]);
                     if (printoptions.ContainsKey("sharename") == false)
                     {
                         printer.SetPropertyValue("ShareName", printoptions["name"]);
                     }
                     //printer.SetPropertyValue("WorkOffline", true);
 
-                    /*var npp = printer.Properties;
-                    foreach (var p in npp)
-                    {
-                        Console.WriteLine(p.Name + ": " + printer.GetPropertyValue(p.Name));
-                    }*/
+                    //var npp = printer.Properties;
+                    //foreach (var p in npp)
+                    //{
+                    //    Console.WriteLine(p.Name + ": " + printer.GetPropertyValue(p.Name));
+                    //}
 
                     //printer.SetPropertyValue("DriverName", "Canon MF731C/733C UFR II");
                     //printer.SetPropertyValue("PortName", "192.168.1.52");
@@ -490,8 +497,8 @@ namespace PrintManagement.pslib
                     //printer.SetPropertyValue("Default", true);
                     //ManagementBaseObject result = printerClass.InvokeMethod("AddPrinterConnection", printer, null);
                     PutOptions options = new PutOptions();
-                    //options.Type = PutType.UpdateOrCreate;
-                    options.Type = PutType.CreateOnly;
+                    options.Type = PutType.UpdateOnly;
+                    //options.Type = PutType.CreateOnly;
                     printer.Put(options);
 
                     updateCache(printoptions["name"]);
@@ -520,13 +527,53 @@ namespace PrintManagement.pslib
                 {
                     return "A printer named " + printoptions["name"] + " already exists";
                 }
-            }
-            //print server option
-            /*try
-            {
-                LocalPrintServer localPrintServer = new LocalPrintServer();
-                localPrintServer.InstallPrintQueue(printoptions["name"], printoptions["drivername"], new string[] { printoptions["portname"] }, "WinPrint", PrintQueueAttributes.None, "", "", "", "",  1, 1);
             }*/
+            //print server option
+            try
+            {
+                ManagementObject printqueue = Get(printoptions["name"]);
+                if (printqueue == null)
+                {
+                    List<PrintQueueAttributes> pqa = new List<PrintQueueAttributes>();
+                    string sharename = "";
+                    string comment = "";
+                    string location = "";
+                    pqa.Add(PrintQueueAttributes.None);
+                    if (printoptions.ContainsKey("published") && printoptions["published"] == true)
+                    {
+                        pqa.Add(PrintQueueAttributes.Published);
+                    }
+                    if (printoptions.ContainsKey("shared") && printoptions["shared"] == true)
+                    {
+                        pqa.Add(PrintQueueAttributes.Shared);
+                        if (printoptions.ContainsKey("sharename"))
+                        {
+                            sharename = printoptions["sharename"];
+                        }
+                        else
+                        {
+                            sharename = printoptions["name"];
+                        }
+                    }
+                    if (printoptions.ContainsKey("comment"))
+                    {
+                        comment = printoptions["comment"];
+                    }
+                    if (printoptions.ContainsKey("location"))
+                    {
+                        location = printoptions["location"];
+                    }
+                    LocalPrintServer localPrintServer = new LocalPrintServer();
+                    //PrintQueue printqueue = new PrintQueue(new LocalPrintServer(), name, PrintSystemDesiredAccess.AdministratePrinter);
+                    localPrintServer.InstallPrintQueue(printoptions["name"], printoptions["drivername"], new string[] { printoptions["portname"] }, "WinPrint", (PrintQueueAttributes)Enum.Parse(typeof(PrintQueueAttributes), String.Join(",", pqa)), sharename, comment, location, null, 1, 1);
+                    updateCache(printoptions["name"]);
+                    return null;
+                }
+                else
+                {
+                    return "A printer named " + printoptions["name"] + " already exists";
+                }
+            }
             catch (Exception e)
             {
                 errorlog el = new errorlog();
@@ -621,7 +668,8 @@ namespace PrintManagement.pslib
                 p.StartInfo.UseShellExecute = false;
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
-                p.StartInfo.FileName = "setprinter.exe";
+                Console.WriteLine(strWorkPath + "\\setprinter.exe");
+                p.StartInfo.FileName = strWorkPath + "\\setprinter.exe";
                 //Console.WriteLine("-show \"" + options.name + "\" " + type);
                 p.StartInfo.Arguments = "-show \"" + options.name + "\" " + type;
                 p.StartInfo.CreateNoWindow = true;
