@@ -361,17 +361,19 @@ namespace PrintManagement.responderlib
             }
             else if (path == "/register")
             {
-                body.result = "error";
+                body.result = "success";
                 body.message = null;
                 body.data = new Hashtable()
                 {
                     {"hostname", GetLocalhostFqdn()},
-                    {"agentVersion", "0.47" }
+                    {"agentVersion", "0.48" }
                 };
             }
             else
             {
-
+                body.result = "error";
+                body.message = "Unrecognized request to " + path;
+                body.data = null;
             }
 
             //Console.WriteLine("and here");
