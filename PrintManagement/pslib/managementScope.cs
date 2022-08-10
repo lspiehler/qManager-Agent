@@ -36,8 +36,11 @@ namespace PrintManagement.pslib
             wmiConnectionOptions.EnablePrivileges = true; // required to load/install the driver.
                                                           // Supposed equivalent to VBScript objWMIService.Security_.Privileges.AddAsString "SeLoadDriverPrivilege", True 
 
-            string path = "root\\cimv2";
-            ms = new ManagementScope(path, wmiConnectionOptions);
+            ManagementPath mp = new ManagementPath();
+            mp.NamespacePath = @"\root\cimv2";
+            mp.Server = "";
+
+            ms = new ManagementScope(mp, wmiConnectionOptions);
             ms.Connect();
 
             return ms;
