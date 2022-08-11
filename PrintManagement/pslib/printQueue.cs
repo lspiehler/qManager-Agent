@@ -9,6 +9,7 @@ using System.Printing;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace PrintManagement.pslib
 {
@@ -17,10 +18,13 @@ namespace PrintManagement.pslib
         static string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
         static string strWorkPath = System.IO.Path.GetDirectoryName(strExeFilePath);
 
+        [DllImport("printui.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern void PrintUIEntryW(IntPtr hwnd, IntPtr hinst, string lpszCmdLine, int nCmdShow);
+
         static managementScope ms = managementScope.Instance;
         static configHandler confighandler = configHandler.Instance;
         static Dictionary<string, string> config = confighandler.getConfig();
-        Dictionary<string, printerlib.GetPrinter> cachedobjects;
+        static Dictionary<string, printerlib.GetPrinter> cachedobjects;
         //getPrinterPort getprinterport = new getPrinterPort();
         printPort printport = new printPort();
 
@@ -104,6 +108,25 @@ namespace PrintManagement.pslib
                 }
             }
         };
+
+        public string PrintTestPage(string name)
+        {
+            Console.WriteLine("Printing test page to " + name);
+            try
+            {
+                var printParams = string.Format(@"/k /q /n{0}", "\"" + name + "\"");
+                PrintUIEntryW(IntPtr.Zero, IntPtr.Zero, printParams, 0);
+                updateCache(name);
+            }
+            catch (Exception e)
+            {
+                errorlog el = new errorlog();
+                el.write(e.ToString(), Environment.StackTrace, "error");
+                return e.ToString();
+            }
+
+            return null;
+        }
 
         private void updateCache(string queuename)
         { // need to modify code for updating vs creating. Check if key exists in cache????
@@ -567,7 +590,26 @@ namespace PrintManagement.pslib
                     //PrintQueue printqueue = new PrintQueue(new LocalPrintServer(), name, PrintSystemDesiredAccess.AdministratePrinter);
                     localPrintServer.InstallPrintQueue(printoptions["name"], printoptions["drivername"], new string[] { printoptions["portname"] }, "WinPrint", (PrintQueueAttributes)Enum.Parse(typeof(PrintQueueAttributes), String.Join(",", pqa)), sharename, comment, location, null, 1, 0);
                     updateCache(printoptions["name"]);
-                    return null;
+
+                    if (printoptions.ContainsKey("config"))
+                    {
+                        //Console.WriteLine(printoptions["name"].ToString());
+                        //Console.WriteLine(JsonConvert.SerializeObject(printoptions["config"]));
+                        //Console.WriteLine(JsonConvert.SerializeObject(printoptions["config"][0]));
+                        string sps = SetPrintSettings(printoptions["name"].ToString(), new Dictionary<string, dynamic>(printoptions["config"][0]));
+                        if (sps != null)
+                        {
+                            return "The print queue was created successfully, but applying print settings failed";
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
                 else
                 {

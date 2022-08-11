@@ -13,7 +13,6 @@ namespace PrintManagement.responderlib
 {
     class ActionResponse
     {
-        private pslib.testPage testpage = new pslib.testPage();
         private pslib.printQueue printqueue = new pslib.printQueue();
         private pslib.printPort printport = new pslib.printPort();
         private pslib.printDriver printdriver = new pslib.printDriver();
@@ -298,7 +297,7 @@ namespace PrintManagement.responderlib
             {
                 try
                 {
-                    string result = testpage.Print(rm.body.options.name);
+                    string result = printqueue.PrintTestPage(rm.body.options.name);
                     if (result == null)
                     {
                         body.result = "success";
