@@ -103,7 +103,7 @@ namespace PrintManagement
             //dynamic message = JsonConvert.DeserializeObject<dynamic>(response);
             dynamic message = JsonConvert.DeserializeObject<ExpandoObject>(response);
 
-            Console.WriteLine(message.type);
+            //Console.WriteLine(message.type);
 
             if(message.type == "request")
             {
