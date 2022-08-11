@@ -102,24 +102,58 @@ namespace PrintManagement.responderlib
 
                     //Hashtable myPrintQueues = pmprintqueues.getQueues();
                     //pslib.getPrinter getprinter = new pslib.getPrinter();
+                    try
+                    {
+                        body.result = "success";
+                        body.message = null;
+                        body.data = new Hashtable(printqueue.GetAll(updatecache));
+                    }
+                    catch(Exception e)
+                    {
+                        body.result = "error";
+                        body.message = e.ToString();
+                        body.data = null;
 
-                    body.result = "success";
-                    body.message = null;
-                    body.data = new Hashtable(printqueue.GetAll(updatecache));
+                        errorlog el = new errorlog();
+                        el.write(e.ToString(), Environment.StackTrace, "error");
+                    }
                 }
                 else if (path == "/printer/port/list")
                 {
                     //pslib.getPrinterPort getprinterport = new pslib.getPrinterPort();
+                    try
+                    {
+                        body.result = "success";
+                        body.message = null;
+                        body.data = new Hashtable(printport.GetAll(updatecache));
+                    }
+                    catch (Exception e)
+                    {
+                        body.result = "error";
+                        body.message = e.ToString();
+                        body.data = null;
 
-                    body.result = "success";
-                    body.message = null;
-                    body.data = new Hashtable(printport.GetAll(updatecache));
+                        errorlog el = new errorlog();
+                        el.write(e.ToString(), Environment.StackTrace, "error");
+                    }
                 }
                 else if (path == "/printer/driver/list")
                 {
-                    body.result = "success";
-                    body.message = null;
-                    body.data = new Hashtable(printdriver.Get(updatecache));
+                    try
+                    {
+                        body.result = "success";
+                        body.message = null;
+                        body.data = new Hashtable(printdriver.Get(updatecache));
+                    }
+                    catch (Exception e)
+                    {
+                        body.result = "error";
+                        body.message = e.ToString();
+                        body.data = null;
+
+                        errorlog el = new errorlog();
+                        el.write(e.ToString(), Environment.StackTrace, "error");
+                    }
                 }
                 else
                 {
