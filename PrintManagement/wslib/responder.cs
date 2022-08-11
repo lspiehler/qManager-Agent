@@ -15,8 +15,8 @@ namespace PrintManagement.wslib
     }
     class responder
     {
-        private List<pendingResponse> sendqueue = new List<pendingResponse>();
-        private bool sending = false;
+        private static List<pendingResponse> sendqueue = new List<pendingResponse>();
+        private static bool sending = false;
         public async Task Send(System.Net.WebSockets.Managed.ClientWebSocket ws, ArraySegment<byte> message)
         {
             pendingResponse pr = new pendingResponse();
@@ -49,6 +49,8 @@ namespace PrintManagement.wslib
                         true,
                         CancellationToken.None
                     );
+                    Console.WriteLine("Removing index:");
+                    Console.WriteLine(i);
                     sendqueue.RemoveAt(i);
                 }
                 sending = false;
