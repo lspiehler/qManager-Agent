@@ -18,6 +18,7 @@ namespace PrintManagement
     {
         //responderlib.CachedResponse cr = new responderlib.CachedResponse();
         responderlib.ActionResponse ar = new responderlib.ActionResponse();
+        responderlib.QueuedResponse qr = new responderlib.QueuedResponse();
         //responderlib.RegisterResponse rr = new responderlib.RegisterResponse();
 
         /*Dictionary<string, Action<ClientWebSocket, dynamic>> routes = new Dictionary<string, Action<ClientWebSocket, dynamic>>();
@@ -113,7 +114,7 @@ namespace PrintManagement
                 else if (message.body.path == "/printer/driver/list")
                 {
                     //Console.WriteLine("got to driver handler");
-                    ar.ProcessResponse(clientWebSocket, message);
+                    qr.ProcessResponse(clientWebSocket, message);
                 }
                 else if (message.body.path == "/printer/port/create")
                 {
@@ -121,7 +122,7 @@ namespace PrintManagement
                 }
                 else if (message.body.path == "/printer/port/list")
                 {
-                    ar.ProcessResponse(clientWebSocket, message);
+                    qr.ProcessResponse(clientWebSocket, message);
                 }
                 else if (message.body.path == "/printer/queue/create")
                 {
@@ -141,7 +142,7 @@ namespace PrintManagement
                 }
                 else if (message.body.path == "/printer/queue/list")
                 {
-                    ar.ProcessResponse(clientWebSocket, message);
+                    qr.ProcessResponse(clientWebSocket, message);
                 }
                 else if (message.body.path == "/printer/queue/set")
                 {

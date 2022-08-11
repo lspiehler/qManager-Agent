@@ -67,7 +67,7 @@ namespace PrintManagement.responderlib
                     el.write(e.ToString(), Environment.StackTrace, "error");
                 }
             }
-            else if (path == "/printer/port/list")
+            /*else if (path == "/printer/port/list")
             {
                 try
                 {
@@ -96,7 +96,7 @@ namespace PrintManagement.responderlib
                     errorlog el = new errorlog();
                     el.write(e.ToString(), Environment.StackTrace, "error");
                 }
-            }
+            }*/
             else if (path == "/printer/queue/create")
             {
                 try
@@ -206,7 +206,7 @@ namespace PrintManagement.responderlib
                     el.write(e.ToString(), Environment.StackTrace, "error");
                 }
             }
-            else if (path == "/printer/queue/list")
+            /*else if (path == "/printer/queue/list")
             {
                 try
                 {
@@ -235,7 +235,7 @@ namespace PrintManagement.responderlib
                     errorlog el = new errorlog();
                     el.write(e.ToString(), Environment.StackTrace, "error");
                 }
-            }
+            }*/
             else if (path == "/printer/queue/set")
             {
                 try
@@ -322,7 +322,7 @@ namespace PrintManagement.responderlib
                     el.write(e.ToString(), Environment.StackTrace, "error");
                 }
             }
-            else if (path == "/printer/driver/list")
+            /*else if (path == "/printer/driver/list")
             {
                 try
                 {
@@ -358,7 +358,7 @@ namespace PrintManagement.responderlib
                     errorlog el = new errorlog();
                     el.write(e.ToString(), Environment.StackTrace, "error");
                 }
-            }
+            }*/
             else if (path == "/register")
             {
                 body.result = "success";

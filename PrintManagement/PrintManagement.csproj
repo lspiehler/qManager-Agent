@@ -142,6 +142,7 @@
     <Compile Include="pslib\testPage.cs" />
     <Compile Include="responderlib\ActionResponse.cs" />
     <Compile Include="responderlib\Common.cs" />
+    <Compile Include="responderlib\QueuedResponse.cs" />
     <Compile Include="wsClient.cs" />
     <Compile Include="PrinterAgent.cs" />
     <Compile Include="ProjectInstaller.cs">
