@@ -43,6 +43,8 @@ namespace PrintManagement.wslib
                 sending = true;
                 for (int i = sendqueue.Count - 1; i >= 0; i--)
                 {
+                    //Thread.Sleep(4000);
+                    //Console.WriteLine("sending message");
                     await sendqueue[i].ws.SendAsync(
                         sendqueue[i].message,
                         WebSocketMessageType.Text,
@@ -58,6 +60,7 @@ namespace PrintManagement.wslib
             }
             catch (Exception e)
             {
+                sending = false;
                 errorlog el = new errorlog();
                 el.write(e.ToString(), Environment.StackTrace, "error");
             }

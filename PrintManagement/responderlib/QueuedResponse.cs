@@ -203,13 +203,14 @@ namespace PrintManagement.responderlib
                     try
                     {
                         await wsresponser.Send(cachedtypes[path].clients[clientkeys[i]], bytestosend);
+                        cachedtypes[path].clients.Remove(clientkeys[i]);
                     }
                     catch (Exception e)
                     {
+                        cachedtypes[path].clients.Remove(clientkeys[i]);
                         errorlog el = new errorlog();
                         el.write(e.ToString(), Environment.StackTrace, "error");
                     }
-                    cachedtypes[path].clients.Remove(clientkeys[i]);
                 }
 
                 Console.WriteLine(cachedtypes[path].clients.Count + " remaining");
