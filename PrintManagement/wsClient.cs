@@ -34,7 +34,7 @@ namespace PrintManagement
             Console.WriteLine(clientWebSocket.State.ToString());
             clientWebSocket.Dispose();
             ctoken.Dispose();
-            //clientWebSocket = new System.Net.WebSockets.Managed.ClientWebSocket();
+            clientWebSocket = new System.Net.WebSockets.Managed.ClientWebSocket();
             ctoken = new CancellationTokenSource();
             initiateWebSocket();
         }
@@ -61,7 +61,7 @@ namespace PrintManagement
             }
         }
 
-        private System.Net.WebSockets.Managed.ClientWebSocket clientWebSocket;
+        private System.Net.WebSockets.Managed.ClientWebSocket clientWebSocket = new System.Net.WebSockets.Managed.ClientWebSocket();
         private CancellationTokenSource ctoken = new CancellationTokenSource();
         private bool connected = false;
         private bool timerinitiated = false;
@@ -152,8 +152,6 @@ namespace PrintManagement
                     }
                 }
             }
-
-            clientWebSocket = new System.Net.WebSockets.Managed.ClientWebSocket();
 
             if (certificate == null) {
                 errorlog el = new errorlog();
