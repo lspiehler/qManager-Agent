@@ -36,3 +36,21 @@ C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe "C:\Users\LyasSpie
 sc create "Print Management" binpath= "C:\Users\LyasSpiehler\source\repos\PrintManagement\PrintManagement\bin\Release\PrintManagement.exe"
 
 sc delete "Print Management"
+
+---
+## Installation Notes
+
+https://subscription.packtpub.com/book/application-development/9781782160427/2/ch02lvl1sec19/harvesting-files-with-heat-exe
+
+cd "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+heat dir C:\Users\LyasSpiehler\source\repos\qManager-Agent\PrintManagement\bin\Debug -dr PrintManagement -cg SourceFilesGroup -ag -g1 -sfrag -srd -var "var.MyDir" -out "C:\Users\LyasSpiehler\source\repos\qManager-Agent\WixInstaller\bin\Debug\test.wxs"
+
+#pre-build
+"C:\Program Files (x86)\WiX Toolset v3.11\bin\heat.exe" dir $(SolutionDir)\PrintManagement\bin\Debug -dr PrintManagement -cg SourceFilesGroup -ag -g1 -sfrag -srd -var "var.MyDir" -out "$(SolutionDir)\WixInstaller\bin\Debug\test.wxs"
+
+https://stackoverflow.com/questions/36756311/include-all-files-in-bin-folder-in-wix-installer
+
+https://stackoverflow.com/questions/20748544/how-to-generate-consistent-guid-using-wix-harvest-tool
+"Yes. -ag flag is used if you want to do minor upgrades. If you have used previously -gg flag, then switching to -ag flag wont help you anymore(if that's the case; you could write custom tool that processes your wxs to keep GUIDS consistent - you can read everything from MSI file). Note that Guid="*" on Component wont produce Guid randomly - it is calculated from the path. If you want to verify things, you should set up test environment and see how minor upgrades work. – 
+Erti-Chris Eelmaa"
+---

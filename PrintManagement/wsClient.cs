@@ -96,7 +96,10 @@ namespace PrintManagement
                     ctoken.Cancel();
                     ctoken.Dispose();
                 }
-                clientWebSocket.Dispose();
+                if (clientWebSocket != null)
+                {
+                    clientWebSocket.Dispose();
+                }
             }
         }
 
@@ -185,10 +188,12 @@ namespace PrintManagement
             }
             catch(Exception e)
             {
+                errorlog el = new errorlog();
+                el.write(e.ToString(), Environment.StackTrace, "error");
                 Console.WriteLine(e.ToString());
             }
 
-            Console.WriteLine("done");
+            //Console.WriteLine("done");
 
             if (clientWebSocket.State == WebSocketState.Open)
             {
