@@ -42,7 +42,7 @@ namespace PrintManagement
         private void processTimer()
         {
             if (timer.Enabled) {
-                Console.WriteLine("Timer interrupted");
+                //Console.WriteLine("Timer interrupted");
                 timer.Stop();
                 timer.Start();
             }
@@ -213,7 +213,7 @@ namespace PrintManagement
                 {
                     //Console.WriteLine(Encoding.UTF8.GetString(bytesReceived.Array, 0, result.Count));
 
-                    Console.WriteLine("waiting for messages");
+                    //Console.WriteLine("waiting for messages");
                     ArraySegment<byte> bytesReceived = new ArraySegment<byte>(new byte[1024]);
 
                     WebSocketReceiveResult result = await clientWebSocket.ReceiveAsync(

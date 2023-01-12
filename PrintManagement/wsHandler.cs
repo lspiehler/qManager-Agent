@@ -98,7 +98,7 @@ namespace PrintManagement
         {
             String response = Encoding.UTF8.GetString(bytesReceived.Array, 0, result.Count);
 
-            Console.WriteLine(response);
+            //Console.WriteLine(response);
 
             //dynamic message = JsonConvert.DeserializeObject<dynamic>(response);
             dynamic message = JsonConvert.DeserializeObject<ExpandoObject>(response);
@@ -107,6 +107,7 @@ namespace PrintManagement
 
             if(message.type == "request")
             {
+                Console.WriteLine(response);
                 if (message.body.path == "/register")
                 {
                     ar.ProcessResponse(clientWebSocket, message);
