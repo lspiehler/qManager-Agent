@@ -365,7 +365,7 @@ namespace PrintManagement.responderlib
                 body.data = new Hashtable()
                 {
                     {"hostname", GetLocalhostFqdn()},
-                    {"agentVersion", "0.54" }
+                    {"agentVersion", "0.6" }
                 };
             }
             else
