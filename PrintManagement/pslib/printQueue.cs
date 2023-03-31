@@ -111,7 +111,7 @@ namespace PrintManagement.pslib
 
         public string PrintTestPage(string name)
         {
-            Console.WriteLine("Printing test page to " + name);
+            Console.WriteLine(DateTime.Now.ToString() + " Printing test page to " + name);
             try
             {
                 var printParams = string.Format(@"/k /q /n{0}", "\"" + name + "\"");
@@ -178,12 +178,12 @@ namespace PrintManagement.pslib
                         }
                         else
                         {
-                            Console.WriteLine("Failed to find the port to update the cache");
+                            Console.WriteLine(DateTime.Now.ToString() + " Failed to find the port to update the cache");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Failed to find the printer to update the cache");
+                        Console.WriteLine(DateTime.Now.ToString() + " Failed to find the printer to update the cache");
                     }
                 }
                 catch (Exception e)
@@ -260,7 +260,7 @@ namespace PrintManagement.pslib
             }
             else
             {
-                Console.WriteLine("Returning cached printers");
+                Console.WriteLine(DateTime.Now.ToString() + " Returning cached printers");
                 return cachedobjects;
             }
         }
@@ -275,7 +275,7 @@ namespace PrintManagement.pslib
             {
                 if (updatecache == true || cachedobjects == null)
                 {
-                    Console.WriteLine("Running powershell command");
+                    Console.WriteLine(DateTime.Now.ToString() + " Running powershell command");
 
                     //getPrinterPort getprinterport = new getPrinterPort();
                     Dictionary<string, printerlib.GetPrinterPort> printerports = printport.GetAll(updatecache);
@@ -710,7 +710,7 @@ namespace PrintManagement.pslib
                 p.StartInfo.UseShellExecute = false;
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
-                Console.WriteLine(strWorkPath + "\\setprinter.exe");
+                Console.WriteLine(DateTime.Now.ToString() + " " + strWorkPath + "\\setprinter.exe");
                 p.StartInfo.FileName = strWorkPath + "\\setprinter.exe";
                 //Console.WriteLine("-show \"" + options.name + "\" " + type);
                 p.StartInfo.Arguments = "-show \"" + options.name + "\" " + type;

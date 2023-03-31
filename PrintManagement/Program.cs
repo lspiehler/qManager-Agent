@@ -24,8 +24,8 @@ namespace PrintManagement
                 wsClient wsclient = new wsClient();
                 wsclient.initiateWebSocket();
 
-                Console.WriteLine("Opening socket");
-                /*Console.WriteLine("Starting HTTP listener...");
+                /*Console.WriteLine("Opening socket");
+                Console.WriteLine("Starting HTTP listener...");
 
                 //var httpServer = new HttpServer();
                 //httpServer.Start();

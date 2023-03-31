@@ -51,7 +51,7 @@ namespace PrintManagement.wslib
                         true,
                         CancellationToken.None
                     );
-                    Console.WriteLine("Removing index:");
+                    Console.WriteLine(DateTime.Now.ToString() + " Removing index:");
                     Console.WriteLine(i);
                     sendqueue.RemoveAt(i);
                 }

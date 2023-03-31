@@ -107,7 +107,7 @@ namespace PrintManagement
 
             if(message.type == "request")
             {
-                Console.WriteLine(response);
+                Console.WriteLine(DateTime.Now.ToString() + " " + response);
                 if (message.body.path == "/register")
                 {
                     ar.ProcessResponse(clientWebSocket, message);
@@ -168,7 +168,7 @@ namespace PrintManagement
             }
             else if(message.type == "ping")
             {
-                
+                Console.WriteLine(DateTime.Now.ToString() + " " + response);
             }
             else
             {

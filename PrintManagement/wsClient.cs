@@ -27,11 +27,11 @@ namespace PrintManagement
             }
             else
             {
-                Console.WriteLine("The connection to the server failed. Trying again...");
+                Console.WriteLine(DateTime.Now.ToString() + " The connection to the server failed. Trying again...");
                 ctoken.Cancel();
             }
-            Console.WriteLine("Timer expired");
-            Console.WriteLine(clientWebSocket.State.ToString());
+            Console.WriteLine(DateTime.Now.ToString() + " Timer expired");
+            Console.WriteLine(DateTime.Now.ToString() + " " + clientWebSocket.State.ToString());
             clientWebSocket.Dispose();
             ctoken.Dispose();
             //clientWebSocket = new System.Net.WebSockets.Managed.ClientWebSocket();
@@ -166,19 +166,19 @@ namespace PrintManagement
             }
             else
             {
-                Console.WriteLine("Using certificate:");
+                Console.WriteLine(DateTime.Now.ToString() + " Using certificate:");
                 Console.WriteLine(certificate.ToString());
                 clientWebSocket.Options.ClientCertificates.Add(certificate);
             }
 
             if (config["Proxy"] != null) {
-                Console.WriteLine("Using proxy " + config["Proxy"]);
+                Console.WriteLine(DateTime.Now.ToString() + " Using proxy " + config["Proxy"]);
                 System.Net.WebProxy proxy = new System.Net.WebProxy(config["Proxy"]);
 
                 clientWebSocket.Options.Proxy = proxy;
             }
 
-            Console.WriteLine("Opening web socket");
+            Console.WriteLine(DateTime.Now.ToString() + " Opening web socket");
 
             processTimer();
 
@@ -190,7 +190,7 @@ namespace PrintManagement
             {
                 errorlog el = new errorlog();
                 el.write(e.ToString(), Environment.StackTrace, "error");
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now.ToString() + " " + e.ToString());
             }
 
             //Console.WriteLine("done");
