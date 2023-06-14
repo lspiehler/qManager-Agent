@@ -41,7 +41,7 @@ namespace PrintManagement.responderlib
             {
                 try
                 {
-                    string result = printport.Create(rm.body.options.ip, 1, rm.body.options.ip, 9100, true);
+                    string result = printport.Create(rm.body.options.ip, 1, rm.body.options.ip, 9100, false);
                     if (result == null)
                     {
                         body.result = "success";
@@ -365,7 +365,7 @@ namespace PrintManagement.responderlib
                 body.data = new Hashtable()
                 {
                     {"hostname", GetLocalhostFqdn()},
-                    {"agentVersion", "0.6" }
+                    {"agentVersion", "0.7" }
                 };
             }
             else
