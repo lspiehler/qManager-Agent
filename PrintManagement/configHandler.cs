@@ -22,6 +22,9 @@ namespace PrintManagement
 
         [Option('c', "cert", Required = false, HelpText = "The certificate used for authentication to qManager")]
         public string Certificate { get; set; }
+
+        [Option('p', "showpings", Required = false, HelpText = "Show logs of ping requests from the server. This can be helpful for troubleshooting.")]
+        public string ShowPings { get; set; }
     }
     public sealed class configHandler
     {

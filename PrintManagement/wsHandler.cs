@@ -17,6 +17,8 @@ namespace PrintManagement
     class wsHandler
     {
         //responderlib.CachedResponse cr = new responderlib.CachedResponse();
+        static configHandler confighandler = configHandler.Instance;
+        static Dictionary<string, string> config = confighandler.getConfig();
         responderlib.ActionResponse ar = new responderlib.ActionResponse();
         responderlib.QueuedResponse qr = new responderlib.QueuedResponse();
         //responderlib.RegisterResponse rr = new responderlib.RegisterResponse();
@@ -168,7 +170,9 @@ namespace PrintManagement
             }
             else if(message.type == "ping")
             {
-                Console.WriteLine(DateTime.Now.ToString() + " " + response);
+                if (config["ShowPings"] != null && config["ShowPings"].ToLower() == "true") {
+                    Console.WriteLine(DateTime.Now.ToString() + " " + response);
+                }
             }
             else
             {
