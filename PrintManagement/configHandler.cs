@@ -23,8 +23,11 @@ namespace PrintManagement
         [Option('c', "cert", Required = false, HelpText = "The certificate used for authentication to qManager")]
         public string Certificate { get; set; }
 
-        [Option('p', "showpings", Required = false, HelpText = "Show logs of ping requests from the server. This can be helpful for troubleshooting.")]
+        [Option('m', "showpings", Required = false, HelpText = "Show logs of ping requests from the server. This can be helpful for troubleshooting.")]
         public string ShowPings { get; set; }
+
+        [Option('g', "groups", Required = false, HelpText = "Comma separated list of groups the agent will be a member of")]
+        public string Groups { get; set; }
     }
     public sealed class configHandler
     {

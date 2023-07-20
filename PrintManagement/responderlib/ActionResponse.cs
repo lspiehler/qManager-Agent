@@ -17,6 +17,8 @@ namespace PrintManagement.responderlib
         private pslib.printPort printport = new pslib.printPort();
         private pslib.printDriver printdriver = new pslib.printDriver();
         private wslib.responder wsresponser = new wslib.responder();
+        static configHandler confighandler = configHandler.Instance;
+        static Dictionary<string, string> config = confighandler.getConfig();
         private static string GetLocalhostFqdn()
         {
             var ipProperties = IPGlobalProperties.GetIPGlobalProperties();
@@ -360,13 +362,30 @@ namespace PrintManagement.responderlib
             }*/
             else if (path == "/register")
             {
-                body.result = "success";
-                body.message = null;
-                body.data = new Hashtable()
+                try
                 {
-                    {"hostname", GetLocalhostFqdn()},
-                    {"agentVersion", "0.7" }
-                };
+                    string[] groups;
+                    if(config["Groups"] != null)
+                    {
+                        groups = config["Groups"].Split(new string[] { "," }, StringSplitOptions.None);
+                    } else
+                    {
+                        groups = new string[] { };
+                    }
+                    body.result = "success";
+                    body.message = null;
+                    body.data = new Hashtable()
+                    {
+                        {"hostname", GetLocalhostFqdn()},
+                        {"agentVersion", "0.8" },
+                        {"groups", groups}
+                    };
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                }
             }
             else
             {
@@ -389,7 +408,7 @@ namespace PrintManagement.responderlib
                 Encoding.UTF8.GetBytes(jsonresp)
             );
 
-            //Console.WriteLine(jsonresp);
+            Console.WriteLine(jsonresp);
 
             try
             {
