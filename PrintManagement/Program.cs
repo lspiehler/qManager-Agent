@@ -5,6 +5,7 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading;
+using System.IO;
 
 namespace PrintManagement
 {
@@ -19,6 +20,17 @@ namespace PrintManagement
         {
             configHandler confighandler = configHandler.Instance;
             confighandler.loadConfig(args);
+            Dictionary<string, string> config = confighandler.getConfig();
+            if (config["Script"] != null)
+            {
+                if (!File.Exists(config["Script"]))
+                {
+                    errorlog el = new errorlog();
+                    el.write(config["Script"] + " does not exist", Environment.StackTrace, "error");
+                    Console.WriteLine(config["Script"] + " does not exist");
+                    return;
+                }
+            }
             if (Environment.UserInteractive)
             {
                 wsClient wsclient = new wsClient();

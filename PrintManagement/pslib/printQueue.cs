@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -116,7 +117,7 @@ namespace PrintManagement.pslib
             {
                 var printParams = string.Format(@"/k /q /n{0}", "\"" + name + "\"");
                 PrintUIEntryW(IntPtr.Zero, IntPtr.Zero, printParams, 0);
-                updateCache(name);
+                updateCache("TestPage", name);
             }
             catch (Exception e)
             {
@@ -128,74 +129,120 @@ namespace PrintManagement.pslib
             return null;
         }
 
-        private void updateCache(string queuename)
+        private string updateCache(string action, string queuename)
         { // need to modify code for updating vs creating. Check if key exists in cache????
             //Console.WriteLine("Updating cache for queue name " + queuename);
-            if (cachedobjects != null)
+            try
             {
-                try
+                ManagementObject printer = Get(queuename);
+                if (printer != null)
                 {
-                    ManagementObject printer = Get(queuename);
-                    if (printer != null)
+                    printerlib.GetPrinter getobject = new printerlib.GetPrinter();
+
+                    foreach (PropertyData prop in printer.Properties)
                     {
-                        printerlib.GetPrinter getobject = new printerlib.GetPrinter();
-
-                        foreach (PropertyData prop in printer.Properties)
+                        var getproperty = getobject.GetType().GetProperty(prop.Name);
+                        if (getproperty != null)
                         {
-                            var getproperty = getobject.GetType().GetProperty(prop.Name);
-                            if (getproperty != null)
+                            if (prop.Value == null)
                             {
-                                if (prop.Value == null)
-                                {
-                                    getproperty.SetValue(getobject, null);
-                                }
-                                else
-                                {
-                                    getproperty.SetValue(getobject, prop.Value);
-                                }
+                                getproperty.SetValue(getobject, null);
                             }
-                            //Console.WriteLine("{0}: {1}", prop.Name, prop.Value);
+                            else
+                            {
+                                getproperty.SetValue(getobject, prop.Value);
+                            }
                         }
+                        //Console.WriteLine("{0}: {1}", prop.Name, prop.Value);
+                    }
 
-                        ManagementObject port = printport.Get(printer.Properties["PortName"].Value.ToString());
-                        if (port != null)
+                    ManagementObject port = printport.Get(printer.Properties["PortName"].Value.ToString());
+                    if (port != null)
+                    {
+                        getobject.PrinterHostAddress = port.Properties["HostAddress"].Value.ToString();
+                        getobject.JobCount = (uint)printer.Properties["JobCountSinceLastReset"].Value;
+                        getobject.PrinterStatus = (uint)printer.Properties["PrinterState"].Value;
+
+                        //Console.WriteLine("Cache updated successfully");
+
+                        if (cachedobjects != null)
                         {
-                            getobject.PrinterHostAddress = port.Properties["HostAddress"].Value.ToString();
-                            getobject.JobCount = (uint)printer.Properties["JobCountSinceLastReset"].Value;
-                            getobject.PrinterStatus = (uint)printer.Properties["PrinterState"].Value;
-
-                            //Console.WriteLine("Cache updated successfully");
-
                             if (cachedobjects.ContainsKey(queuename))
                             {
                                 cachedobjects[queuename] = getobject;
                             }
                             else
                             {
-                                //Console.WriteLine(JsonConvert.SerializeObject(getobject));
                                 cachedobjects.Add(queuename, getobject);
                             }
                         }
-                        else
+
+                        //only do this if script arg is set
+                        if (config["Script"] != null)
                         {
-                            Console.WriteLine(DateTime.Now.ToString() + " Failed to find the port to update the cache");
+                            if(File.Exists(config["Script"])) {
+                                if (action == "Create" || action == "Update")
+                                {
+                                    printerlib.PSResult psresult = new printerlib.PSResult();
+                                    psresult.Action = action;
+                                    psresult.Type = "Printer";
+                                    psresult.Printer = getobject;
+                                    string jsonresult = JsonConvert.SerializeObject(psresult);
+                                    using (System.Management.Automation.PowerShell PowerShellInst = System.Management.Automation.PowerShell.Create())
+                                    {
+                                        PowerShellInst.AddScript("$json = '" + jsonresult + "' | ConvertFrom-Json\r\n. \"" + config["Script"] + "\" -result $json");
+                                        //PowerShellInst.AddScript("$json = '"+ jsonprinter +"' | ConvertFrom-Json");
+                                        //PowerShellInst.AddCommand(". \"C:\\Users\\LyasSpiehler\\OneDrive - Sapphire Health Technology Services\\Desktop\\powershell test\\script.ps1\" -Result $json");
+
+                                        Collection<System.Management.Automation.PSObject> PSOutput = PowerShellInst.Invoke();
+
+                                        if (PowerShellInst.HadErrors)
+                                        {
+                                            List<string> errors = new List<string>();
+                                            for (int i = 0; i < PowerShellInst.Streams.Error.Count; i++)
+                                            {
+                                                errors.Add(PowerShellInst.Streams.Error[i].ToString());
+                                            }
+                                            errorlog el = new errorlog();
+                                            el.write("Error executing script " + config["Script"] + ": " + String.Join("", errors), Environment.StackTrace, "error");
+                                            return "Error executing script " + config["Script"] + ": " + String.Join("", errors);
+                                        } else
+                                        {
+                                            return null;
+                                        }
+                                    }
+                                } else
+                                {
+                                    return null;
+                                }
+                            }
+                            else
+                            {
+                                return config["Script"] + " does not exist";
+                            }
+                        } else
+                        {
+                            return null;
                         }
                     }
                     else
                     {
-                        Console.WriteLine(DateTime.Now.ToString() + " Failed to find the printer to update the cache");
+                        Console.WriteLine(DateTime.Now.ToString() + " Failed to find the port to update the cache");
+                        return "Failed to find the port to update the cache";
                     }
+
                 }
-                catch (Exception e)
+                else
                 {
-                    errorlog el = new errorlog();
-                    el.write(e.ToString(), Environment.StackTrace, "error");
-                    return;
+                    Console.WriteLine(DateTime.Now.ToString() + " Failed to find the printer to update the cache");
+                    return "Failed to find the printer to update the cache";
                 }
             }
-            else
+            catch (Exception e)
             {
-                return;
+                errorlog el = new errorlog();
+                el.write(e.ToString(), Environment.StackTrace, "error");
+                return e.ToString();
             }
         }
 
@@ -360,7 +407,7 @@ namespace PrintManagement.pslib
             {
                 PrintQueue printqueue = new PrintQueue(new LocalPrintServer(), name, PrintSystemDesiredAccess.AdministratePrinter);
                 printqueue.Purge();
-                updateCache(name);
+                updateCache("Clear", name);
             }
             catch (Exception e)
             {
@@ -589,26 +636,34 @@ namespace PrintManagement.pslib
                     LocalPrintServer localPrintServer = new LocalPrintServer();
                     //PrintQueue printqueue = new PrintQueue(new LocalPrintServer(), name, PrintSystemDesiredAccess.AdministratePrinter);
                     localPrintServer.InstallPrintQueue(printoptions["name"], printoptions["drivername"], new string[] { printoptions["portname"] }, "WinPrint", (PrintQueueAttributes)Enum.Parse(typeof(PrintQueueAttributes), String.Join(",", pqa)), sharename, comment, location, null, 1, 0);
-                    updateCache(printoptions["name"]);
 
-                    if (printoptions.ContainsKey("config"))
+                    string ucresult = updateCache("Create", printoptions["name"]);
+
+                    if (ucresult != null)
                     {
-                        //Console.WriteLine(printoptions["name"].ToString());
-                        //Console.WriteLine(JsonConvert.SerializeObject(printoptions["config"]));
-                        //Console.WriteLine(JsonConvert.SerializeObject(printoptions["config"][0]));
-                        string sps = SetPrintSettings(printoptions["name"].ToString(), new Dictionary<string, dynamic>(printoptions["config"][0]));
-                        if (sps != null)
+                        return ucresult;
+                    }
+                    else
+                    {
+                        if (printoptions.ContainsKey("config"))
                         {
-                            return "The print queue was created successfully, but applying print settings failed";
+                            //Console.WriteLine(printoptions["name"].ToString());
+                            //Console.WriteLine(JsonConvert.SerializeObject(printoptions["config"]));
+                            //Console.WriteLine(JsonConvert.SerializeObject(printoptions["config"][0]));
+                            string sps = SetPrintSettings(printoptions["name"].ToString(), new Dictionary<string, dynamic>(printoptions["config"][0]));
+                            if (sps != null)
+                            {
+                                return "The print queue was created successfully, but applying print settings failed";
+                            }
+                            else
+                            {
+                                return null;
+                            }
                         }
                         else
                         {
                             return null;
                         }
-                    }
-                    else
-                    {
-                        return null;
                     }
                 }
                 else
@@ -670,9 +725,16 @@ namespace PrintManagement.pslib
                     options.Type = PutType.UpdateOnly;
                     printqueue.Put(options);
 
-                    updateCache(queueoptions["name"]);
+                    string ucresult = updateCache("Update", queueoptions["name"]);
 
-                    return null;
+                    if (ucresult != null)
+                    {
+                        return ucresult;
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
                 else
                 {

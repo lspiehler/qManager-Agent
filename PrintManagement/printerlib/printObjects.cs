@@ -80,6 +80,13 @@ namespace PrintManagement.printerlib
         public string[] StatusDescriptions { get; set; }
         public string VendorSetup { get; set; }
     }
+
+    public class PSResult
+    {
+        public string Action { get; set; }
+        public string Type { get; set; }
+        public GetPrinter Printer { get; set; }
+    }
     public class GetPrinter
     {
         public string Caption { get; set; }

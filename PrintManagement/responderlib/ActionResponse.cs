@@ -377,7 +377,7 @@ namespace PrintManagement.responderlib
                     body.data = new Hashtable()
                     {
                         {"hostname", GetLocalhostFqdn()},
-                        {"agentVersion", "0.8" },
+                        {"agentVersion", "0.9" },
                         {"groups", groups}
                     };
                 }
@@ -408,7 +408,7 @@ namespace PrintManagement.responderlib
                 Encoding.UTF8.GetBytes(jsonresp)
             );
 
-            Console.WriteLine(jsonresp);
+            //Console.WriteLine(jsonresp);
 
             try
             {

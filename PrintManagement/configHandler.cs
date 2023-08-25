@@ -28,6 +28,9 @@ namespace PrintManagement
 
         [Option('g', "groups", Required = false, HelpText = "Comma separated list of groups the agent will be a member of")]
         public string Groups { get; set; }
+
+        [Option('e', "script", Required = false, HelpText = "Script to call when printers are created or modified")]
+        public string Script { get; set; }
     }
     public sealed class configHandler
     {
