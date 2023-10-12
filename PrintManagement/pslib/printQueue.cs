@@ -107,6 +107,18 @@ namespace PrintManagement.pslib
                     { "type", "string" },
                     { "name", "Location" }
                 }
+            },
+            { "Shared", new Dictionary<string, string>
+                {
+                    { "type", "bool" },
+                    { "name", "Shared" }
+                }
+            },
+            { "ShareName", new Dictionary<string, string>
+                {
+                    { "type", "string" },
+                    { "name", "ShareName" }
+                }
             }
         };
 
@@ -183,11 +195,11 @@ namespace PrintManagement.pslib
                             if(File.Exists(config["Script"])) {
                                 if (action == "Create" || action == "Update")
                                 {
-                                    printerlib.PSResult psresult = new printerlib.PSResult();
-                                    psresult.Action = action;
-                                    psresult.Type = "Printer";
-                                    psresult.Printer = getobject;
-                                    string jsonresult = JsonConvert.SerializeObject(psresult);
+                                    printerlib.PSPrinterResult psprinterresult = new printerlib.PSPrinterResult();
+                                    psprinterresult.Action = action;
+                                    psprinterresult.Type = "Printer";
+                                    psprinterresult.Printer = getobject;
+                                    string jsonresult = JsonConvert.SerializeObject(psprinterresult);
                                     using (System.Management.Automation.PowerShell PowerShellInst = System.Management.Automation.PowerShell.Create())
                                     {
                                         PowerShellInst.AddScript("$json = '" + jsonresult + "' | ConvertFrom-Json\r\n. \"" + config["Script"] + "\" -result $json");

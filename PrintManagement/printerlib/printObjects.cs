@@ -81,11 +81,18 @@ namespace PrintManagement.printerlib
         public string VendorSetup { get; set; }
     }
 
-    public class PSResult
+    public class PSPrinterResult
     {
         public string Action { get; set; }
         public string Type { get; set; }
         public GetPrinter Printer { get; set; }
+    }
+
+    public class PSPortResult
+    {
+        public string Action { get; set; }
+        public string Type { get; set; }
+        public GetPrinterPort Port { get; set; }
     }
     public class GetPrinter
     {

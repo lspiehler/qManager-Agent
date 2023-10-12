@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 //using System.Management.Automation;
 using System.Management;
 using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace PrintManagement.pslib
 {
@@ -58,6 +60,75 @@ namespace PrintManagement.pslib
                     newPrinterPort.SetPropertyValue("PortNumber", port);    // default=9100
                     newPrinterPort.SetPropertyValue("SNMPEnabled", snmp);  // true?
                     newPrinterPort.Put();
+
+                    ManagementObject printerport = Get(name);
+                    if (printerport != null)
+                    {
+                        if (config["Script"] != null)
+                        {
+                            if (File.Exists(config["Script"]))
+                            {
+                                printerlib.PSPortResult psportresult = new printerlib.PSPortResult();
+                                psportresult.Action = "Create";
+                                psportresult.Type = "Port";
+                                printerlib.GetPrinterPort getobject = new printerlib.GetPrinterPort();
+                                foreach (PropertyData prop in printerport.Properties)
+                                {
+                                    var getproperty = getobject.GetType().GetProperty(prop.Name);
+                                    if (getproperty != null)
+                                    {
+                                        if (prop.Value == null)
+                                        {
+                                            getproperty.SetValue(getobject, null);
+                                        }
+                                        else
+                                        {
+                                            getproperty.SetValue(getobject, prop.Value);
+                                        }
+                                    }
+                                    //Console.WriteLine("{0}: {1}", prop.Name, prop.Value);
+                                }
+                                psportresult.Port = getobject;
+                                string jsonresult = JsonConvert.SerializeObject(psportresult);
+                                using (System.Management.Automation.PowerShell PowerShellInst = System.Management.Automation.PowerShell.Create())
+                                {
+                                    PowerShellInst.AddScript("$json = '" + jsonresult + "' | ConvertFrom-Json\r\n. \"" + config["Script"] + "\" -result $json");
+                                    //PowerShellInst.AddScript("$json = '"+ jsonprinter +"' | ConvertFrom-Json");
+                                    //PowerShellInst.AddCommand(". \"C:\\Users\\LyasSpiehler\\OneDrive - Sapphire Health Technology Services\\Desktop\\powershell test\\script.ps1\" -Result $json");
+
+                                    Collection<System.Management.Automation.PSObject> PSOutput = PowerShellInst.Invoke();
+
+                                    if (PowerShellInst.HadErrors)
+                                    {
+                                        List<string> errors = new List<string>();
+                                        for (int i = 0; i < PowerShellInst.Streams.Error.Count; i++)
+                                        {
+                                            errors.Add(PowerShellInst.Streams.Error[i].ToString());
+                                        }
+                                        errorlog el = new errorlog();
+                                        el.write("Error executing script " + config["Script"] + ": " + String.Join("", errors), Environment.StackTrace, "error");
+                                        return "Error executing script " + config["Script"] + ": " + String.Join("", errors);
+                                    }
+                                    else
+                                    {
+                                        return null;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                return config["Script"] + " does not exist";
+                            }
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                    else
+                    {
+                        return "Failed to create the port " + name;
+                    }
                 } else
                 {
                     return "The printer port already exists";
