@@ -727,6 +727,38 @@ namespace PrintManagement.pslib
                         }
                     }
 
+                    if(qo.ContainsKey("Shared"))
+                    {
+                        if (qo["Shared"].ToString() == "True" || (printqueue["Shared"].ToString() == "True" && qo["Shared"].ToString() == "False"))
+                        {
+                            if (qo.ContainsKey("ShareName"))
+                            {
+                                if (qo["ShareName"] == null || qo["ShareName"].ToString() == "")
+                                {
+                                    return "ShareName cannot be blank on a shared queue";
+                                }
+                            } else
+                            {
+                                if (printqueue["ShareName"] == null || printqueue["ShareName"].ToString() == "")
+                                {
+                                    printqueue.SetPropertyValue(queueprops["ShareName"]["name"], queueoptions["name"]);
+                                }
+                            }
+                        }
+                    } else
+                    {
+                        if(printqueue["Shared"].ToString() == "True")
+                        {
+                            if (qo.ContainsKey("ShareName"))
+                            {
+                                if (qo["ShareName"] == null || qo["ShareName"].ToString() == "")
+                                {
+                                    return "ShareName cannot be blank on a shared queue";
+                                }
+                            }
+                        }
+                    }
+
                     var npp = printqueue.Properties;
                     /*foreach (var p in npp)
                     {
