@@ -45,7 +45,14 @@ namespace PrintManagement
 
             var appLog = new EventLog("Application");
             appLog.Source = "Print Management";
-            appLog.WriteEntry(message + "\r\n" + st, level);
+            try
+            {
+                appLog.WriteEntry(message + "\r\n" + st, level);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Failed to write to the event log. This is most likely because the application was launched without admin privileges: " + e.ToString());
+            }
             if (type == "error")
             {
                 Console.WriteLine(message + "\r\n" + st);

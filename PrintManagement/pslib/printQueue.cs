@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Management.Automation.Language;
 
 namespace PrintManagement.pslib
 {
@@ -19,8 +21,29 @@ namespace PrintManagement.pslib
         static string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
         static string strWorkPath = System.IO.Path.GetDirectoryName(strExeFilePath);
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        static extern IntPtr LoadLibrary(string lpFileName);
+        IntPtr hInst = LoadLibrary("printui.dll");
+
         [DllImport("printui.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern void PrintUIEntryW(IntPtr hwnd, IntPtr hinst, string lpszCmdLine, int nCmdShow);
+
+        [DllImport("winspool.drv", SetLastError = true)]
+        static extern bool OpenPrinter(
+            string pPrinterName,
+            out IntPtr phPrinter,
+            IntPtr pDefault);
+
+        [DllImport("winspool.drv", SetLastError = true)]
+        static extern bool ClosePrinter(IntPtr hPrinter);
+
+        [DllImport("winspool.drv", SetLastError = true)]
+        static extern bool GetPrinter(
+            IntPtr hPrinter,
+            int Level,
+            IntPtr pPrinter,
+            int cbBuf,
+            out int pcbNeeded);
 
         static managementScope ms = managementScope.Instance;
         static configHandler confighandler = configHandler.Instance;
@@ -139,6 +162,38 @@ namespace PrintManagement.pslib
             }
 
             return null;
+        }
+
+        private static void ExportPrinter(string printerName, string outputPath)
+        {
+            if (!OpenPrinter(printerName, out var hPrinter, IntPtr.Zero))
+                throw new System.ComponentModel.Win32Exception();
+
+            try
+            {
+                int needed;
+                GetPrinter(hPrinter, 2, IntPtr.Zero, 0, out needed);
+
+                IntPtr buffer = Marshal.AllocHGlobal(needed);
+                try
+                {
+                    if (!GetPrinter(hPrinter, 2, buffer, needed, out _))
+                        throw new System.ComponentModel.Win32Exception();
+
+                    byte[] data = new byte[needed];
+                    Marshal.Copy(buffer, data, 0, needed);
+
+                    File.WriteAllBytes(outputPath, data);
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(buffer);
+                }
+            }
+            finally
+            {
+                ClosePrinter(hPrinter);
+            }
         }
 
         private string updateCache(string action, string queuename)
@@ -475,7 +530,8 @@ namespace PrintManagement.pslib
                         return "Failed to delete the print queue";
                     }*/
                     printqueue.Delete();
-                    if(cachedobjects != null) {
+                    if (cachedobjects != null)
+                    {
                         cachedobjects.Remove(name);
                     }
                     return null;
@@ -490,6 +546,192 @@ namespace PrintManagement.pslib
                 errorlog el = new errorlog();
                 el.write(e.ToString(), Environment.StackTrace, "error");
                 return e.ToString();
+            }
+
+            //return null;
+        }
+
+        public string Dump2(string name)
+        {
+            string tempFile = Path.GetTempFileName();
+            try
+            {
+                string args = string.Format(@"/Ss /q /n {0} /a {1}", "\"" + name + "\"", "\"" + tempFile + "\"");
+                Console.WriteLine(DateTime.Now.ToString() + " Dumping printer " + name + " to " + tempFile + " using params (" + args + ")");
+                PrintUIEntryW(IntPtr.Zero, hInst, args, 0);
+                return null;
+            }
+            catch (Exception e)
+            {
+                errorlog el = new errorlog();
+                el.write(e.ToString(), Environment.StackTrace, "error");
+                return e.ToString();
+            }
+
+            //return null;
+        }
+
+        public static byte[] Gzip(byte[] data)
+        {
+            using (var output = new MemoryStream())
+            {
+                using (var gzip = new GZipStream(output, CompressionLevel.Optimal))
+                {
+                    gzip.Write(data, 0, data.Length);
+                } // closing gzip flushes data
+                return output.ToArray();
+            }
+        }
+
+        public static byte[] Gunzip(byte[] compressedData)
+        {
+            using (var input = new MemoryStream(compressedData))
+            using (var gzip = new GZipStream(input, CompressionMode.Decompress))
+            using (var output = new MemoryStream())
+            {
+                byte[] buffer = new byte[8192]; // 8 KB buffer
+                int read;
+                while ((read = gzip.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    output.Write(buffer, 0, read);
+                }
+                return output.ToArray();
+            }
+        }
+
+
+        public static string Base64UrlEncode(byte[] data)
+        {
+            string base64 = Convert.ToBase64String(data);
+            return base64
+                .TrimEnd('=')
+                .Replace('+', '-')
+                .Replace('/', '_');
+        }
+
+        public static byte[] Base64UrlDecode(string base64Url)
+        {
+            string base64 = base64Url
+                .Replace('-', '+')
+                .Replace('_', '/');
+
+            // Pad with '=' to make length a multiple of 4
+            int padding = 4 - (base64.Length % 4);
+            if (padding < 4)
+            {
+                base64 = base64 + new string('=', padding);
+            }
+
+            return Convert.FromBase64String(base64);
+        }
+
+
+        public string Dump(string name)
+        {
+            string tempFile = Path.GetTempFileName();
+            string args = string.Format(@"/Ss /n {0} /a {1}", "\"" + name + "\"", "\"" + tempFile + "\"");
+            Console.WriteLine(DateTime.Now.ToString() + " Dumping printer settings " + name + " to " + tempFile + " using params (" + args + ")");
+            try
+            {
+                //var stdOutBuffer = new StringBuilder();
+                //var stdErrBuffer = new StringBuilder();
+                Process p = new Process();
+                // Redirect the output stream of the child process.
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.RedirectStandardError = true;
+                Console.WriteLine(DateTime.Now.ToString() + " " + strWorkPath + "\\setprinter.exe");
+                p.StartInfo.FileName = "rundll32.exe";
+                //Console.WriteLine("-show \"" + options.name + "\" " + type);
+                p.StartInfo.Arguments = "printui.dll,PrintUIEntry " + args;
+                Console.WriteLine(p.StartInfo.Arguments);
+                p.StartInfo.CreateNoWindow = true;
+                p.Start();
+
+                string sResult = p.StandardOutput.ReadToEnd();
+
+                byte[] rawData = File.ReadAllBytes(tempFile);
+                byte[] compressed = Gzip(rawData);
+                string payload = Base64UrlEncode(compressed);
+
+                //Console.WriteLine(payload);
+
+                return payload;
+            }
+            catch (Exception e)
+            {
+                errorlog el = new errorlog();
+                el.write(e.ToString(), Environment.StackTrace, "error");
+                throw new Exception(e.ToString());
+                //return e.ToString();
+            }
+            finally
+            {
+                if (File.Exists(tempFile))
+                {
+                    try
+                    {
+                        File.Delete(tempFile);
+                    }
+                    catch
+                    {
+                        // Optionally log, but don't let cleanup throw
+                    }
+                }
+            }
+
+            //return null;
+        }
+
+        public void Ingest(string name, string settings)
+        {
+            string tempFile = Path.GetTempFileName();
+            string args = string.Format(@"/Sr /q /n {0} /a {1}", "\"" + name + "\"", "\"" + tempFile + "\" r p i");
+            Console.WriteLine(DateTime.Now.ToString() + " Importing printer settings " + name + " from " + tempFile + " using params (" + args + ")");
+            try
+            {
+                byte[] decoded = Base64UrlDecode(settings);
+                byte[] decompressed = Gunzip(decoded);
+                File.WriteAllBytes(tempFile, decompressed);
+
+                //var stdOutBuffer = new StringBuilder();
+                //var stdErrBuffer = new StringBuilder();
+                Process p = new Process();
+                // Redirect the output stream of the child process.
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.RedirectStandardError = true;
+                Console.WriteLine(DateTime.Now.ToString() + " " + strWorkPath + "\\setprinter.exe");
+                p.StartInfo.FileName = "rundll32.exe";
+                //Console.WriteLine("-show \"" + options.name + "\" " + type);
+                p.StartInfo.Arguments = "printui.dll,PrintUIEntry " + args;
+                Console.WriteLine(p.StartInfo.Arguments);
+                p.StartInfo.CreateNoWindow = true;
+                p.Start();
+
+                string sResult = p.StandardOutput.ReadToEnd();
+
+            }
+            catch (Exception e)
+            {
+                errorlog el = new errorlog();
+                el.write(e.ToString(), Environment.StackTrace, "error");
+                throw new Exception(e.ToString());
+                //return e.ToString();
+            }
+            finally
+            {
+                if (File.Exists(tempFile))
+                {
+                    try
+                    {
+                        File.Delete(tempFile);
+                    }
+                    catch
+                    {
+                        // Optionally log, but don't let cleanup throw
+                    }
+                }
             }
 
             //return null;
@@ -659,10 +901,15 @@ namespace PrintManagement.pslib
                     {
                         if (printoptions.ContainsKey("config"))
                         {
+                            Dictionary<string, dynamic> config = new Dictionary<string, dynamic>(printoptions["config"][0]);
+                            if (config.ContainsKey("settings"))
+                            {
+                                Ingest(printoptions["name"], config["settings"]);
+                            }
                             //Console.WriteLine(printoptions["name"].ToString());
                             //Console.WriteLine(JsonConvert.SerializeObject(printoptions["config"]));
-                            //Console.WriteLine(JsonConvert.SerializeObject(printoptions["config"][0]));
-                            string sps = SetPrintSettings(printoptions["name"].ToString(), new Dictionary<string, dynamic>(printoptions["config"][0]));
+                            //Console.WriteLine(JsonConvert.SerializeObject(config));
+                            string sps = SetPrintSettings(printoptions["name"].ToString(), config);
                             if (sps != null)
                             {
                                 return "The print queue was created successfully, but applying print settings failed";

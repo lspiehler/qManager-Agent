@@ -323,6 +323,62 @@ namespace PrintManagement.responderlib
                     el.write(e.ToString(), Environment.StackTrace, "error");
                 }
             }
+            else if (path == "/printer/queue/dump")
+            {
+                try
+                {
+                    string result = printqueue.Dump(rm.body.options.name);
+
+                    body.data = new Hashtable()
+                    {
+                        {"name", rm.body.options.name },
+                        {"server", rm.body.options.server }
+                    };
+
+                    if (result != null)
+                    {
+                        body.data.Add("settings", result);
+
+                        body.result = "success";
+                        body.message = "Settings exported successfully";
+                    }
+                    else
+                    {
+                        body.result = "error";
+                        body.message = "Export failed";
+                    }
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                    body.result = "error";
+                    body.message = e.ToString();
+                }
+            }
+            else if (path == "/printer/queue/ingest")
+            {
+                try
+                {
+                    printqueue.Ingest(rm.body.options.name, rm.body.options.options.settings);
+
+                    body.data = new Hashtable()
+                    {
+                        {"name", rm.body.options.name },
+                        {"server", rm.body.options.server }
+                    };
+
+                    body.result = "success";
+                    body.message = "Settings imported successfully";
+                }
+                catch (Exception e)
+                {
+                    errorlog el = new errorlog();
+                    el.write(e.ToString(), Environment.StackTrace, "error");
+                    body.result = "error";
+                    body.message = e.ToString();
+                }
+            }
             /*else if (path == "/printer/driver/list")
             {
                 try
@@ -377,7 +433,7 @@ namespace PrintManagement.responderlib
                     body.data = new Hashtable()
                     {
                         {"hostname", GetLocalhostFqdn()},
-                        {"agentVersion", "0.94" },
+                        {"agentVersion", "0.96" },
                         {"groups", groups}
                     };
                 }

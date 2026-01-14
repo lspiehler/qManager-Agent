@@ -161,6 +161,7 @@ namespace PrintManagement
             if (certificate == null) {
                 errorlog el = new errorlog();
                 el.write("Failed to find certificate", Environment.StackTrace, "error");
+                //Console.WriteLine("here");
                 Console.ReadLine();
                 Environment.Exit(-1);
             }
@@ -198,40 +199,55 @@ namespace PrintManagement
             if (clientWebSocket.State == WebSocketState.Open)
             {
                 connected = true;
-                /*ArraySegment<byte> bytesToSend = new ArraySegment<byte>(
-                     Encoding.UTF8.GetBytes("{\"name\": \"" + GetLocalhostFqdn() + "\", \"port\": 3000}")
-                 );
 
-                await clientWebSocket.SendAsync(
-                     bytesToSend,
-                     WebSocketMessageType.Text,
-                     true,
-                     CancellationToken.None
-                 );*/
+                byte[] buffer = new byte[32768];
 
-                while (true)
+                while (clientWebSocket.State == WebSocketState.Open)
                 {
-                    //Console.WriteLine(Encoding.UTF8.GetString(bytesReceived.Array, 0, result.Count));
+                    MemoryStream ms = new MemoryStream();
+                    WebSocketReceiveResult result = null;
 
-                    //Console.WriteLine("waiting for messages");
-                    ArraySegment<byte> bytesReceived = new ArraySegment<byte>(new byte[1024]);
-
-                    WebSocketReceiveResult result = await clientWebSocket.ReceiveAsync(
-                        bytesReceived,
-                        CancellationToken.None
-                    );
-
-                    processTimer();
-
-                    //await wsrouter.wsRequestHandler(clientWebSocket, bytesReceived, result);
-
-                    Task.Factory.StartNew(() =>
+                    try
                     {
-                        wsrouter.wsRequestHandler(clientWebSocket, bytesReceived, result);
-                    });
-                    //Task.Factory.StartNew(wsrouter.wsRequestHandler(clientWebSocket, bytesReceived, result));
+                        do
+                        {
+                            result = await clientWebSocket.ReceiveAsync(
+                                new ArraySegment<byte>(buffer),
+                                CancellationToken.None);
+
+                            if (result.MessageType == WebSocketMessageType.Close)
+                            {
+                                await clientWebSocket.CloseAsync(
+                                    WebSocketCloseStatus.NormalClosure,
+                                    "Closing",
+                                    CancellationToken.None);
+                                return;
+                            }
+
+                            ms.Write(buffer, 0, result.Count);
+
+                        } while (!result.EndOfMessage);
+
+                        processTimer();
+
+                        // IMPORTANT: copy before handing off
+                        byte[] messageBytes = ms.ToArray();
+
+                        // Sequential, safe processing
+                        await wsrouter.wsRequestHandler(
+                            clientWebSocket,
+                            messageBytes,
+                            result.MessageType
+                        );
+                    }
+                    finally
+                    {
+                        ms.Dispose();
+                    }
                 }
             }
+
+
         }
 
     }

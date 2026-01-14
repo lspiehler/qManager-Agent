@@ -91,14 +91,15 @@ namespace PrintManagement
         }
 
         PrinterAgent printeragent = new PrinterAgent();*/
-        public async Task wsRequestHandler(System.Net.WebSockets.Managed.ClientWebSocket clientWebSocket, ArraySegment<byte> bytesReceived, WebSocketReceiveResult result)
+        public async Task wsRequestHandler(System.Net.WebSockets.Managed.ClientWebSocket clientWebSocket, byte[] bytesReceived, WebSocketMessageType result)
         {
             processMessage(clientWebSocket, bytesReceived, result);
         }
 
-        private async Task processMessage(System.Net.WebSockets.Managed.ClientWebSocket clientWebSocket, ArraySegment<byte> bytesReceived, WebSocketReceiveResult result)
+        private async Task processMessage(System.Net.WebSockets.Managed.ClientWebSocket clientWebSocket, byte[] bytesReceived, WebSocketMessageType result)
         {
-            String response = Encoding.UTF8.GetString(bytesReceived.Array, 0, result.Count);
+            //String response = Encoding.UTF8.GetString(bytesReceived, 0, result);
+            string response = Encoding.UTF8.GetString(bytesReceived);
 
             //Console.WriteLine(response);
 
@@ -156,6 +157,14 @@ namespace PrintManagement
                     ar.ProcessResponse(clientWebSocket, message);
                 }
                 else if (message.body.path == "/printer/queue/testpage")
+                {
+                    ar.ProcessResponse(clientWebSocket, message);
+                }
+                else if (message.body.path == "/printer/queue/dump")
+                {
+                    ar.ProcessResponse(clientWebSocket, message);
+                }
+                else if (message.body.path == "/printer/queue/ingest")
                 {
                     ar.ProcessResponse(clientWebSocket, message);
                 }
