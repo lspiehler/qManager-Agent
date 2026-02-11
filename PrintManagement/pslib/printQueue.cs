@@ -629,7 +629,7 @@ namespace PrintManagement.pslib
         public string Dump(string name)
         {
             string tempFile = Path.GetTempFileName();
-            string args = string.Format(@"/Ss /n {0} /a {1}", "\"" + name + "\"", "\"" + tempFile + "\"");
+            string args = string.Format(@"/Ss /n {0} /a {1} c g u", "\"" + name + "\"", "\"" + tempFile + "\"");
             Console.WriteLine(DateTime.Now.ToString() + " Dumping printer settings " + name + " to " + tempFile + " using params (" + args + ")");
             try
             {
@@ -686,7 +686,7 @@ namespace PrintManagement.pslib
         public void Ingest(string name, string settings)
         {
             string tempFile = Path.GetTempFileName();
-            string args = string.Format(@"/Sr /q /n {0} /a {1}", "\"" + name + "\"", "\"" + tempFile + "\" r p i");
+            string args = string.Format(@"/Sr /q /n {0} /a {1}", "\"" + name + "\"", "\"" + tempFile + "\" r p i c g u h");
             Console.WriteLine(DateTime.Now.ToString() + " Importing printer settings " + name + " from " + tempFile + " using params (" + args + ")");
             try
             {
