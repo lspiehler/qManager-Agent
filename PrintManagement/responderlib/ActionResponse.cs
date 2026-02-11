@@ -433,7 +433,7 @@ namespace PrintManagement.responderlib
                     body.data = new Hashtable()
                     {
                         {"hostname", GetLocalhostFqdn()},
-                        {"agentVersion", "0.96" },
+                        {"agentVersion", "0.100" },
                         {"groups", groups}
                     };
                 }
