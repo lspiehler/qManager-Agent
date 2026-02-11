@@ -158,7 +158,8 @@ namespace PrintManagement
 
             clientWebSocket = new System.Net.WebSockets.Managed.ClientWebSocket();
 
-            if (certificate == null) {
+            if (certificate == null)
+            {
                 errorlog el = new errorlog();
                 el.write("Failed to find certificate", Environment.StackTrace, "error");
                 //Console.WriteLine("here");
@@ -172,7 +173,8 @@ namespace PrintManagement
                 clientWebSocket.Options.ClientCertificates.Add(certificate);
             }
 
-            if (config["Proxy"] != null) {
+            if (config["Proxy"] != null)
+            {
                 Console.WriteLine(DateTime.Now.ToString() + " Using proxy " + config["Proxy"]);
                 System.Net.WebProxy proxy = new System.Net.WebProxy(config["Proxy"]);
 
@@ -183,11 +185,12 @@ namespace PrintManagement
 
             processTimer();
 
-            try {
+            try
+            {
                 await clientWebSocket.ConnectAsync(location, ctoken.Token);
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 errorlog el = new errorlog();
                 el.write(e.ToString(), Environment.StackTrace, "error");
@@ -233,12 +236,12 @@ namespace PrintManagement
                         // IMPORTANT: copy before handing off
                         byte[] messageBytes = ms.ToArray();
 
-                        // Sequential, safe processing
-                        await wsrouter.wsRequestHandler(
+                        // Parallel processing: do not await, fire-and-forget
+                        _ = Task.Run(() => wsrouter.wsRequestHandler(
                             clientWebSocket,
                             messageBytes,
-                            result.MessageType
-                        );
+                            result
+                        ));
                     }
                     finally
                     {
@@ -246,9 +249,6 @@ namespace PrintManagement
                     }
                 }
             }
-
-
         }
-
     }
 }

@@ -91,12 +91,12 @@ namespace PrintManagement
         }
 
         PrinterAgent printeragent = new PrinterAgent();*/
-        public async Task wsRequestHandler(System.Net.WebSockets.Managed.ClientWebSocket clientWebSocket, byte[] bytesReceived, WebSocketMessageType result)
+        public async Task wsRequestHandler(System.Net.WebSockets.Managed.ClientWebSocket clientWebSocket, byte[] bytesReceived, WebSocketReceiveResult result)
         {
             processMessage(clientWebSocket, bytesReceived, result);
         }
 
-        private async Task processMessage(System.Net.WebSockets.Managed.ClientWebSocket clientWebSocket, byte[] bytesReceived, WebSocketMessageType result)
+        private async Task processMessage(System.Net.WebSockets.Managed.ClientWebSocket clientWebSocket, byte[] bytesReceived, WebSocketReceiveResult result)
         {
             //String response = Encoding.UTF8.GetString(bytesReceived, 0, result);
             string response = Encoding.UTF8.GetString(bytesReceived);
@@ -146,6 +146,8 @@ namespace PrintManagement
                 }
                 else if (message.body.path == "/printer/queue/list")
                 {
+                    // Test delayed response
+                    //Thread.Sleep(15000);
                     qr.ProcessResponse(clientWebSocket, message);
                 }
                 else if (message.body.path == "/printer/queue/set")
