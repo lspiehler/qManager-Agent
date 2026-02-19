@@ -22,5 +22,8 @@ jobs:
     - name: Build solution
       run: msbuild PrintManagement.sln /t:Restore,Build /p:Configuration=Release
 
+    - name: Compile InnoSetup Installer
+      run: iscc.exe ./InnoSetup/qmanager.iss
+
     - name: Show build output
-      run: dir PrintManagement/bin/Release/
+      run: dir -Recurse PrintManagement/bin/Release/
