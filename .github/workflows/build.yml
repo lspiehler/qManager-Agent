@@ -51,6 +51,6 @@ jobs:
         --account-name $env:AZURE_STORAGE_ACCOUNT `
         --container-name $env:AZURE_STORAGE_CONTAINER `
         --name "PrintManagementInstall.exe" `
-        --file "./PrintManagement/InnoSetup/Output/PrintManagementInstall.exe" `
+        --file "./InnoSetup/Output/PrintManagementInstall.exe" `
         --overwrite true `
         --auth-mode login

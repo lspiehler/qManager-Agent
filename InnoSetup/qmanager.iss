@@ -36,6 +36,7 @@ DisableProgramGroupPage=yes
 OutputBaseFilename=PrintManagementInstall
 SolidCompression=yes
 WizardStyle=modern
+OutputDir=D:\a\qManager-Agent\qManager-Agent\InnoSetup\Output
 SourceDir=D:\a\qManager-Agent\qManager-Agent\PrintManagement
 SetupIconFile=include\PrintManagement.ico
 
