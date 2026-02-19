@@ -29,7 +29,7 @@ jobs:
       run: iscc.exe ./InnoSetup/qmanager.iss
 
     - name: Show build output
-      run: dir -Recurse ./PrintManagement
+      run: dir -Recurse ./InnoSetup
 
     - name: Azure Login
       if: steps.version.outputs.changed == 'true'
@@ -44,10 +44,10 @@ jobs:
         AZURE_STORAGE_ACCOUNT: ${{ vars.AZURE_STORAGE_ACCOUNT }}
         AZURE_STORAGE_CONTAINER: ${{ vars.AZURE_STORAGE_CONTAINER }}
       run: |
-        az storage blob upload \
-          --account-name "$AZURE_STORAGE_ACCOUNT" \
-          --container-name "$AZURE_STORAGE_CONTAINER" \
-          --name "PrintManagementInstall.exe" \
-          --file "./PrintManagement/InnoSetup/Output/PrintManagementInstall.exe" \
-          --overwrite true \
-          --auth-mode login
+        az storage blob upload `
+        --account-name $env:AZURE_STORAGE_ACCOUNT `
+        --container-name $env:AZURE_STORAGE_CONTAINER `
+        --name "PrintManagementInstall.exe" `
+        --file "./PrintManagement/InnoSetup/Output/PrintManagementInstall.exe" `
+        --overwrite true `
+        --auth-mode login
