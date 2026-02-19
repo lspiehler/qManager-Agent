@@ -36,7 +36,8 @@ DisableProgramGroupPage=yes
 OutputBaseFilename=PrintManagementInstall
 SolidCompression=yes
 WizardStyle=modern
-SetupIconFile=D:\a\qManager-Agent\qManager-Agent\PrintManagement\include\PrintManagement.ico
+SourceDir=D:\a\qManager-Agent\qManager-Agent\PrintManagement
+SetupIconFile=include\PrintManagement.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -46,9 +47,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 ; Source: "C:\Program Files (x86)\Inno Setup 6\Examples\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\a\qManager-Agent\qManager-Agent\PrintManagement\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "D:\a\qManager-Agent\qManager-Agent\PrintManagement\include\PrintManagement.ico"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\a\qManager-Agent\qManager-Agent\PrintManagement\include\setprinter.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "include\PrintManagement.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "include\setprinter.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
