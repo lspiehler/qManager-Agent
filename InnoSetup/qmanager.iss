@@ -36,7 +36,7 @@ DisableProgramGroupPage=yes
 OutputBaseFilename=PrintManagementInstall
 SolidCompression=yes
 WizardStyle=modern
-SetupIconFile=.\PrintManagement\include\PrintManagement.ico
+SetupIconFile=PrintManagement\include\PrintManagement.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -46,9 +46,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 ; Source: "C:\Program Files (x86)\Inno Setup 6\Examples\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\PrintManagement\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: ".\PrintManagement\include\PrintManagement.ico"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\PrintManagement\include\setprinter.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "PrintManagement\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "PrintManagement\include\PrintManagement.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "PrintManagement\include\setprinter.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
