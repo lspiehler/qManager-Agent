@@ -32,7 +32,6 @@ jobs:
       run: dir -Recurse ./InnoSetup
 
     - name: Azure Login
-      if: steps.version.outputs.changed == 'true'
       uses: azure/login@v2
       with:
         client-id: ${{ vars.AZURE_CLIENT_ID }}
