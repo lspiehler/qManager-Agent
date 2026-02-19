@@ -1,13 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30621.155
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36202.13 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintManagement", "PrintManagement\PrintManagement.csproj", "{6F98EBA9-59EE-447E-A2D0-29CF24E30C5D}"
-EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "InstallPrintManagement", "InstallPrintManagement\InstallPrintManagement.vdproj", "{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}"
-EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "qManager Print Agent", "qManager Print Agent\qManager Print Agent.wixproj", "{858D917D-E2FF-4196-9695-77F0181855B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,24 +27,6 @@ Global
 		{6F98EBA9-59EE-447E-A2D0-29CF24E30C5D}.Release|x64.Build.0 = Release|x64
 		{6F98EBA9-59EE-447E-A2D0-29CF24E30C5D}.Release|x86.ActiveCfg = Release|x64
 		{6F98EBA9-59EE-447E-A2D0-29CF24E30C5D}.Release|x86.Build.0 = Release|x64
-		{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}.Debug|Any CPU.ActiveCfg = Debug
-		{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}.Debug|x64.ActiveCfg = Debug
-		{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}.Debug|x64.Build.0 = Debug
-		{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}.Debug|x86.ActiveCfg = Debug
-		{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}.Debug|x86.Build.0 = Debug
-		{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}.Release|Any CPU.ActiveCfg = Release
-		{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}.Release|x64.ActiveCfg = Release
-		{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}.Release|x64.Build.0 = Release
-		{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}.Release|x86.ActiveCfg = Release
-		{A99DC0D6-6FCB-49C6-A6EC-A83D718C59DC}.Release|x86.Build.0 = Release
-		{858D917D-E2FF-4196-9695-77F0181855B4}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{858D917D-E2FF-4196-9695-77F0181855B4}.Debug|x64.ActiveCfg = Debug|x86
-		{858D917D-E2FF-4196-9695-77F0181855B4}.Debug|x86.ActiveCfg = Debug|x86
-		{858D917D-E2FF-4196-9695-77F0181855B4}.Debug|x86.Build.0 = Debug|x86
-		{858D917D-E2FF-4196-9695-77F0181855B4}.Release|Any CPU.ActiveCfg = Release|x86
-		{858D917D-E2FF-4196-9695-77F0181855B4}.Release|x64.ActiveCfg = Release|x86
-		{858D917D-E2FF-4196-9695-77F0181855B4}.Release|x86.ActiveCfg = Release|x86
-		{858D917D-E2FF-4196-9695-77F0181855B4}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
