@@ -30,3 +30,24 @@ jobs:
 
     - name: Show build output
       run: dir -Recurse ./PrintManagement
+
+    - name: Azure Login
+      if: steps.version.outputs.changed == 'true'
+      uses: azure/login@v2
+      with:
+        client-id: ${{ vars.AZURE_CLIENT_ID }}
+        tenant-id: ${{ vars.AZURE_TENANT_ID }}
+        subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Upload zip to Azure Storage
+      env:
+        AZURE_STORAGE_ACCOUNT: ${{ vars.AZURE_STORAGE_ACCOUNT }}
+        AZURE_STORAGE_CONTAINER: ${{ vars.AZURE_STORAGE_CONTAINER }}
+      run: |
+        az storage blob upload \
+          --account-name "$AZURE_STORAGE_ACCOUNT" \
+          --container-name "$AZURE_STORAGE_CONTAINER" \
+          --name "PrintManagementInstall.exe" \
+          --file "./PrintManagement/InnoSetup/Output/PrintManagementInstall.exe" \
+          --overwrite true \
+          --auth-mode login
