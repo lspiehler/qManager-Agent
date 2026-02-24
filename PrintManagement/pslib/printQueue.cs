@@ -142,18 +142,6 @@ namespace PrintManagement.pslib
                     { "type", "string" },
                     { "name", "ShareName" }
                 }
-            },
-            { "StartTime", new Dictionary<string, string>
-                {
-                    { "type", "uint" },
-                    { "name", "StartTime" }
-                }
-            },
-            { "UntilTime", new Dictionary<string, string>
-                {
-                    { "type", "uint" },
-                    { "name", "UntilTime" }
-                }
             }
         };
 
@@ -229,16 +217,7 @@ namespace PrintManagement.pslib
                             }
                             else
                             {
-                                //Console.WriteLine(prop.Name);
-                                //Console.WriteLine(prop.Value.ToString());
-                                if (prop.Name == "StartTime" || prop.Name == "UntilTime")
-                                {
-                                    UInt32 value = CimToPowerShellMinutes(prop.Value.ToString());
-                                    getproperty.SetValue(getobject, value);
-                                } else
-                                {
-                                    getproperty.SetValue(getobject, prop.Value);
-                                }
+                                getproperty.SetValue(getobject, prop.Value);
                             }
                         }
                         //Console.WriteLine("{0}: {1}", prop.Name, prop.Value);
@@ -268,7 +247,8 @@ namespace PrintManagement.pslib
                         //only do this if script arg is set
                         if (config["Script"] != null)
                         {
-                            if(File.Exists(config["Script"])) {
+                            if (File.Exists(config["Script"]))
+                            {
                                 if (action == "Create" || action == "Update")
                                 {
                                     printerlib.PSPrinterResult psprinterresult = new printerlib.PSPrinterResult();
@@ -294,12 +274,14 @@ namespace PrintManagement.pslib
                                             errorlog el = new errorlog();
                                             el.write("Error executing script " + config["Script"] + ": " + String.Join("", errors), Environment.StackTrace, "error");
                                             return "Error executing script " + config["Script"] + ": " + String.Join("", errors);
-                                        } else
+                                        }
+                                        else
                                         {
                                             return null;
                                         }
                                     }
-                                } else
+                                }
+                                else
                                 {
                                     return null;
                                 }
@@ -308,7 +290,8 @@ namespace PrintManagement.pslib
                             {
                                 return config["Script"] + " does not exist";
                             }
-                        } else
+                        }
+                        else
                         {
                             return null;
                         }
@@ -960,39 +943,6 @@ namespace PrintManagement.pslib
 
             //return null;
         }
-
-        public static string PowerShellMinutesToCim(uint minutes)
-        {
-            int offsetMinutes = (int)Math.Abs(TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes);
-
-            int shift = 1440 - offsetMinutes;
-
-            int wmiMinutes = (int)((minutes + shift) % 1440);
-
-            int hour = wmiMinutes / 60;
-            int minute = wmiMinutes % 60;
-
-            return $"********{hour:00}{minute:00}00.000000+000";
-        }
-
-        public static uint CimToPowerShellMinutes(string cim)
-        {
-            if (string.IsNullOrWhiteSpace(cim) || cim.Length < 14)
-                throw new ArgumentException("Invalid CIM datetime format.", nameof(cim));
-
-            int hour = int.Parse(cim.Substring(8, 2));
-            int minute = int.Parse(cim.Substring(10, 2));
-
-            int wmiMinutes = hour * 60 + minute;
-
-            int offsetMinutes = (int)Math.Abs(TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes);
-            int shift = 1440 - offsetMinutes;
-
-            int psMinutes = (wmiMinutes - shift + 1440) % 1440;
-
-            return (uint)psMinutes;
-        }
-
         public string Update(Dictionary<string, dynamic> queueoptions)
         {
             try
@@ -1007,8 +957,6 @@ namespace PrintManagement.pslib
                     //printqueue.GetType().GetProperty("QueueDriver").SetValue(printqueue, "QueueDriver");
                     IDictionary<string, object> qo = queueoptions["options"];
                     var props = qo.Keys;
-                    //Console.WriteLine(JsonConvert.SerializeObject(queueoptions["options"]));
-                    //Console.WriteLine(JsonConvert.SerializeObject(props));
                     /*Console.WriteLine("Requested printer properties:");
                     foreach (var p in props)
                     {
@@ -1018,47 +966,19 @@ namespace PrintManagement.pslib
                     {
                         if (queueprops.ContainsKey(p))
                         {
-                            var propertyName = queueprops[p]["name"];
-                            var propertyType = queueprops[p]["type"];
-                            var value = qo[p];
-
-                            if ((p == "StartTime" || p == "UntilTime") && value is string strValue)
+                            /*if(queueprops[p]["name"] == "QueuePort")
                             {
-                                //Console.WriteLine(p + ": " + qo[p]);
-                                // Convert string to uint if necessary
-                                if (UInt32.TryParse(strValue, out UInt32 intValue))
-                                {
-                                    //Console.WriteLine(intValue);
-                                    //Console.WriteLine(intValue.GetType());
-                                    //Console.WriteLine(printqueue["StartTime"]);
-                                    //Console.WriteLine("Input " + intValue);
-                                    string cimValue = PowerShellMinutesToCim(intValue);
-                                    //Console.WriteLine("Output " + cimValue);
-                                    //Console.WriteLine(TimeZoneInfo.Local.DisplayName);
-                                    //Console.WriteLine(TimeZoneInfo.Local.GetUtcOffset(DateTime.Now));
-                                    //Console.WriteLine(printqueue["StartTime"].GetType());
-                                    try
-                                    {
-                                        printqueue.SetPropertyValue(propertyName, cimValue);
-                                    } catch(Exception e)
-                                    {
-                                        Console.WriteLine(e.ToString());
-                                    }
-                                }
-                                else
-                                {
-                                    throw new ArgumentException($"{p} must be a valid unsigned integer.");
-                                }
-                            }
-                            else
+                                PrintDriver
+                                printqueue.GetType().GetProperty(queueprops[p]["name"]).SetValue(printqueue, qo[p]);
+                            } else
                             {
-                                printqueue.SetPropertyValue(propertyName, value);
-                            }
-                            //printqueue.SetPropertyValue(queueprops[p]["name"], qo[p]);
+                                printqueue.GetType().GetProperty(queueprops[p]["name"]).SetValue(printqueue, qo[p]);
+                            }*/
+                            printqueue.SetPropertyValue(queueprops[p]["name"], qo[p]);
                         }
                     }
 
-                    if(qo.ContainsKey("Shared"))
+                    if (qo.ContainsKey("Shared"))
                     {
                         if (qo["Shared"].ToString() == "True" || (printqueue["Shared"].ToString() == "True" && qo["Shared"].ToString() == "False"))
                         {
@@ -1068,7 +988,8 @@ namespace PrintManagement.pslib
                                 {
                                     return "ShareName cannot be blank on a shared queue";
                                 }
-                            } else
+                            }
+                            else
                             {
                                 if (printqueue["ShareName"] == null || printqueue["ShareName"].ToString() == "")
                                 {
@@ -1076,9 +997,10 @@ namespace PrintManagement.pslib
                                 }
                             }
                         }
-                    } else
+                    }
+                    else
                     {
-                        if(printqueue["Shared"].ToString() == "True")
+                        if (printqueue["Shared"].ToString() == "True")
                         {
                             if (qo.ContainsKey("ShareName"))
                             {
@@ -1192,9 +1114,9 @@ namespace PrintManagement.pslib
                     pp.Add(kv[0], kv[1].Replace("\"", ""));
                 }*/
 
-                    //Console.WriteLine(error);
+                //Console.WriteLine(error);
 
-                    return pp;
+                return pp;
                 /*var cmd = Cli.Wrap("setprinter.exe");
                 cmd.SetArguments(new string[] { options.name, type });
                 //cmd.st
@@ -1264,7 +1186,7 @@ namespace PrintManagement.pslib
                     Console.WriteLine(sResult);
                     Console.WriteLine("Stderr:");
                     Console.WriteLine(eResult);*/
-                    if(String.IsNullOrEmpty(eResult))
+                    if (String.IsNullOrEmpty(eResult))
                     {
                         return null;
                     }
@@ -1273,7 +1195,7 @@ namespace PrintManagement.pslib
                         return eResult;
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     errorlog el = new errorlog();
                     el.write(e.ToString(), Environment.StackTrace, "error");
