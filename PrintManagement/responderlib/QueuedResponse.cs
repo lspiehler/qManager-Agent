@@ -175,7 +175,7 @@ namespace PrintManagement.responderlib
                     resp.type = "response";
                     resp.body = body;
 
-                    string jsonresp = JsonConvert.SerializeObject(resp, Formatting.Indented);
+                    string jsonresp = JsonConvert.SerializeObject(resp);
 
                     //Console.WriteLine(jsonresp);
 
