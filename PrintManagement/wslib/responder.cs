@@ -47,7 +47,7 @@ namespace PrintManagement.wslib
                     //Console.WriteLine("sending message");
                     await sendqueue[i].ws.SendAsync(
                         sendqueue[i].message,
-                        WebSocketMessageType.Text,
+                        WebSocketMessageType.Binary,
                         true,
                         CancellationToken.None
                     );

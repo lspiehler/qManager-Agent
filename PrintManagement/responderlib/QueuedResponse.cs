@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net.WebSockets;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
-using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace PrintManagement.responderlib
 {
@@ -179,9 +181,21 @@ namespace PrintManagement.responderlib
 
                     //Console.WriteLine(jsonresp);
 
-                    ArraySegment<byte> bytestosend = new ArraySegment<byte>(
-                        Encoding.UTF8.GetBytes(jsonresp)
-                    );
+                    byte[] jsonBytes = Encoding.UTF8.GetBytes(jsonresp);
+
+                    byte[] compressedBytes;
+
+                    using (var output = new MemoryStream())
+                    {
+                        using (var gzip = new GZipStream(output, CompressionLevel.Optimal, leaveOpen: true))
+                        {
+                            gzip.Write(jsonBytes, 0, jsonBytes.Length);
+                        }
+
+                        compressedBytes = output.ToArray();
+                    }
+
+                    ArraySegment<byte> bytestosend = new ArraySegment<byte>(compressedBytes);
 
                     //Console.WriteLine("Sending response to message id " + clientkeys[i]);
                     /*try
