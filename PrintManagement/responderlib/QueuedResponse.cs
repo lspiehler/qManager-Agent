@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using PrintManagement.printerlib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -177,7 +178,12 @@ namespace PrintManagement.responderlib
                     resp.type = "response";
                     resp.body = body;
 
-                    string jsonresp = JsonConvert.SerializeObject(resp);
+                    var options = new JsonSerializerOptions
+                    {
+                        IncludeFields = true
+                    };
+
+                    string jsonresp = JsonSerializer.Serialize(resp, options);
 
                     //Console.WriteLine(jsonresp);
 

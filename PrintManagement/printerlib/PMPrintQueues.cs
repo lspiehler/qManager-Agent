@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Printing;
-using Newtonsoft.Json;
 using System.Collections;
 
 namespace PrintManagement

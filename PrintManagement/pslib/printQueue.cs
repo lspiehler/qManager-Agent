@@ -9,7 +9,7 @@ using System.Management;
 using System.Printing;
 //using System.Management.Automation;
 using System.Collections.ObjectModel;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Management.Automation.Language;
@@ -277,7 +277,12 @@ namespace PrintManagement.pslib
                                     psprinterresult.Action = action;
                                     psprinterresult.Type = "Printer";
                                     psprinterresult.Printer = getobject;
-                                    string jsonresult = JsonConvert.SerializeObject(psprinterresult);
+                                    var options = new JsonSerializerOptions
+                                    {
+                                        IncludeFields = true
+                                    };
+
+                                    string jsonresult = JsonSerializer.Serialize(psprinterresult, options);
                                     using (System.Management.Automation.PowerShell PowerShellInst = System.Management.Automation.PowerShell.Create())
                                     {
                                         PowerShellInst.AddScript("$json = '" + jsonresult + "' | ConvertFrom-Json\r\n. \"" + config["Script"] + "\" -result $json");

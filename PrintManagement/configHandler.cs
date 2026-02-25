@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace PrintManagement
 {
@@ -72,7 +72,7 @@ namespace PrintManagement
                            //Console.WriteLine("Quick Start Example!");
                            Console.WriteLine(o.Proxy);
                        }*/
-                       config = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(o));
+                       config = JsonSerializer.Deserialize<Dictionary<string, string>>(JsonSerializer.Serialize(o));
                    });
         }
     }

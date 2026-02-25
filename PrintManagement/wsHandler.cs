@@ -106,9 +106,9 @@ namespace PrintManagement
             //dynamic message = JsonConvert.DeserializeObject<dynamic>(response);
             dynamic message = JsonConvert.DeserializeObject<ExpandoObject>(response);
 
-            //Console.WriteLine(message.type);
+            //Console.WriteLine(JsonConvert.SerializeObject(message));
 
-            if(message.type == "request")
+            if (message.type == "request")
             {
                 Console.WriteLine(DateTime.Now.ToString() + " " + response);
                 if (message.body.path == "/register")
@@ -179,9 +179,10 @@ namespace PrintManagement
             {
 
             }
-            else if(message.type == "ping")
+            else if (message.type == "ping")
             {
-                if (config["ShowPings"] != null && config["ShowPings"].ToLower() == "true") {
+                if (config["ShowPings"] != null && config["ShowPings"].ToLower() == "true")
+                {
                     Console.WriteLine(DateTime.Now.ToString() + " " + response);
                 }
             }

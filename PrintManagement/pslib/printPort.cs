@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 //using System.Management.Automation;
 using System.Management;
 using System.Collections.ObjectModel;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace PrintManagement.pslib
 {
@@ -89,7 +89,12 @@ namespace PrintManagement.pslib
                                     //Console.WriteLine("{0}: {1}", prop.Name, prop.Value);
                                 }
                                 psportresult.Port = getobject;
-                                string jsonresult = JsonConvert.SerializeObject(psportresult);
+                                var options = new JsonSerializerOptions
+                                {
+                                    IncludeFields = true
+                                };
+
+                                string jsonresult = JsonSerializer.Serialize(psportresult, options);
                                 using (System.Management.Automation.PowerShell PowerShellInst = System.Management.Automation.PowerShell.Create())
                                 {
                                     PowerShellInst.AddScript("$json = '" + jsonresult + "' | ConvertFrom-Json\r\n. \"" + config["Script"] + "\" -result $json");
